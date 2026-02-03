@@ -1,0 +1,361 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 14,
+  "summary": "LearnFun is a child-friendly, multilingual educational web app for ages 3–5, 6–8, 9–12, and 13–15. It is a React SPA (Tailwind + shadcn/ui) with three main sections: Game Zone (six mini-games), Quiz Zone (multiple-choice quizzes with backend fetch + local fallback questions), and Coloring Zone (template gallery + interactive drawing canvas). The frontend optionally fetches localized content from an ICP Motoko canister via a typed actor using React Query, with Internet Identity auth supported (anonymous access also works). Because backend content maps are not populated in the provided code, the app primarily relies on rich frontend fallback logic and static image assets under /assets/generated.",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "Age-group selection and in-app navigation",
+      "synonyms": [
+        "Onboarding",
+        "Home navigation"
+      ],
+      "description": "HomePage lets the user pick an age group (3–5, 6–8, 9–12, 13–15) and then navigate to Game Zone, Quiz Zone, or Coloring Zone. App.tsx maintains selected age and current page in component state and supports returning home/resetting age.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "Multilingual UI (10 languages) with persistence",
+      "synonyms": [
+        "i18n",
+        "Language selector"
+      ],
+      "description": "LanguageContext manages the current language (tr/en/es/fr/de/it/ru/pt/zh/ja), persists it to localStorage, and maps it to the backend Language enum. LanguageSelector provides a dropdown with flags/names. UI strings are centralized in frontend/src/lib/translations.ts.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Internet Identity authentication context integration",
+      "synonyms": [
+        "ICP auth",
+        "InternetIdentityProvider"
+      ],
+      "description": "InternetIdentityProvider initializes AuthClient, restores persisted delegation identity if authenticated, and exposes login/logout plus detailed status flags. The app is wrapped with this provider in main.tsx.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Backend canister actor creation with identity-aware caching",
+      "synonyms": [
+        "Actor hook",
+        "useActor"
+      ],
+      "description": "useActor creates a typed canister actor via createActorWithConfig. If identity is absent it returns an anonymous actor; if present, it creates an authenticated actor. When the actor becomes available/changes, it invalidates and refetches non-actor React Query queries.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "React Query data hooks for backend content",
+      "synonyms": [
+        "useQueries",
+        "Data fetching layer"
+      ],
+      "description": "frontend/src/hooks/useQueries.ts provides hooks to fetch games, quiz questions, encouragement messages, memory games, logic puzzles, visual recognition tasks, problem-solving tasks, and coloring templates. Includes frontend-to-backend age-group mapping (string to backend Text/enum) and language-aware query keys for localized endpoints, with error handling, retries, and staleTime configuration.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Global layout with header, footer, theming, and toasts",
+      "synonyms": [
+        "App chrome",
+        "Shell layout"
+      ],
+      "description": "App layout includes a branded Header (mascot, app title, language selector, conditional Home button), decorative Footer, gradient background styling, next-themes ThemeProvider, and a global Sonner Toaster for feedback notifications.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Game Zone hub and mini-game selection",
+      "synonyms": [
+        "Games menu",
+        "Game selection grid"
+      ],
+      "description": "GameZone displays a grid of six mini-games with localized titles/descriptions and static images and switches into the selected game component. It also shows a loading state when backend games are being fetched and shows a celebration modal when a game completes.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Shape Matching Game",
+      "synonyms": [
+        "Shape pair matching",
+        "SVG matching"
+      ],
+      "description": "A click-to-match game using SVG-rendered shapes (circle/square/triangle/star/heart/hexagon). Shape sets and grid layout scale by age group. Tracks moves, prevents selecting already-matched cards, provides toast feedback, and triggers completion when all pairs are matched.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Math Puzzle Game (age-based arithmetic)",
+      "synonyms": [
+        "Arithmetic quiz",
+        "Colorful Math"
+      ],
+      "description": "Generates random arithmetic problems with multiple-choice answers. Difficulty scales by age group (simple addition for 3–5; +/− for 6–8; +/−/× for 9–12; +/−/×/÷ for 13–15). Tracks score and progress over a fixed number of questions with toasts and completion callback.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Memory Card Game with themes, subcategories, and difficulty",
+      "synonyms": [
+        "Card matching",
+        "Memory pairs"
+      ],
+      "description": "Emoji-based memory matching game with many themes and subcategories (colors; animals and multiple animal subtypes; numbers; shapes; space; seasonal scenes; cultural landmarks; household; vehicles; letters; music; professional tools). Pair count and grid sizing scale by age group and selected difficulty. Tracks moves and pairs found, provides toast feedback, and triggers completion callback.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "Logic Puzzle Game with multiple puzzle types",
+      "synonyms": [
+        "Reasoning puzzles",
+        "Pattern puzzles"
+      ],
+      "description": "LogicPuzzleGame supports puzzle types: number sequences, pattern recognition, word logic (TR/EN datasets), plus spatial and time logic for older ages. Tracks score and progression over a fixed number of puzzles, provides type selection UI, and triggers completion callback. Can optionally use backend-provided localized puzzle text (currently uses only the first backend puzzle if present).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Visual Recognition (find-the-differences) game",
+      "synonyms": [
+        "Spot the difference",
+        "Visual recognition"
+      ],
+      "description": "Scene-based find-the-differences game with category/subcategory selection (nature with forest/ocean/mountain; school with classroom/playground; city; creative with art studio/maker space; animals). Randomly generates difference points and validates clicks by proximity. Number of differences scales by age group and completion triggers a callback.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Problem Solving scenarios game",
+      "synonyms": [
+        "Decision-making game",
+        "Scenario quiz"
+      ],
+      "description": "Presents age-appropriate scenarios with multiple-choice answers across categories (everyday, social, creative; plus teamwork and time management for older ages). Tracks score across a fixed number of problems with toast feedback and completion callback. Can optionally use backend-provided localized scenario data (currently uses only the first backend item if present).",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "Quiz Zone with backend fetch and local fallback questions",
+      "synonyms": [
+        "Multiple-choice quiz",
+        "Quiz section"
+      ],
+      "description": "QuizZone fetches quiz questions by age group and language from the backend when available; otherwise generates fallback quizzes for Turkish and English with age-appropriate content. Includes progress tracking, answer result states, scoring, feedback toasts, and a completion celebration modal.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-15",
+      "title": "Celebration modal with confetti and encouragement messages",
+      "synonyms": [
+        "Completion modal",
+        "Rewards UI"
+      ],
+      "description": "CelebrationModal shows animated confetti and trophy/celebration imagery when a game or quiz completes. For games it fetches a language-aware encouragement message from the backend; for quizzes it displays final score (correct/total) and provides replay/continue actions.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Coloring Zone template gallery with backend fallback to static templates",
+      "synonyms": [
+        "Coloring template selection",
+        "Template browser"
+      ],
+      "description": "ColoringZone fetches outline templates by age group from the backend; if none are available, it falls back to hardcoded static templates (frontend/src/lib/coloringFallbackTemplates.ts) served from /assets/generated/*. Selecting a template opens the coloring canvas.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Interactive coloring canvas (draw, undo, zoom, clear, download)",
+      "synonyms": [
+        "ColoringCanvas",
+        "Drawing canvas"
+      ],
+      "description": "ColoringCanvas loads an outline image (backend blob direct URL or static fallback URL) onto an HTML canvas and provides a color palette, brush size control, zoom in/out, undo history (last 20 states), clear/reset, and download-to-PNG. Supports both mouse and touch interactions with localized toast feedback.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-19",
+      "title": "Motoko backend query API for educational content, templates, and sounds",
+      "synonyms": [
+        "Canister API",
+        "Backend read endpoints"
+      ],
+      "description": "backend/main.mo defines types and query endpoints for games, quiz questions (converted to language-specific simple questions), memory games, logic puzzles, visual recognition tasks, problem solving tasks, sound listing/retrieval, and coloring template retrieval (by age group, by category, by id, or all). Includes a language-aware encouragement message generator.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "ICP blob-storage mixin utilities (authorization, pruning, cycles top-up)",
+      "synonyms": [
+        "Caffeine storage mixin",
+        "Blob GC/admin helpers"
+      ],
+      "description": "backend/blob-storage provides Storage and a Mixin exposing methods to update authorized gateway principals, check blob liveness, list dead blobs for deletion, confirm deletions and trigger GC, create upload certificates, and refill cycles via a cashier canister principal from an environment variable.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-21",
+      "title": "Offline image caching utilities for generated/static assets",
+      "synonyms": [
+        "Image cache",
+        "useImageCache"
+      ],
+      "description": "Implements frontend/src/lib/imageCache.ts and frontend/src/hooks/useImageCache.ts to cache image assets for reuse/offline-ish performance, replacing prior placeholders.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-23",
+      "title": "Static fallback coloring templates expanded beyond initial 5 per age group (adds 06–08 sets)",
+      "synonyms": [
+        "More coloring fallback assets",
+        "Additional template pack"
+      ],
+      "description": "Adds additional generated fallback outline templates for each age group (files 06–08 per group) under /public/assets/generated and updates the fallback template mapping accordingly.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-coloring-canvas-touch-gesture-logic-so-that-two-finger-pinch-zooms-toward-the-pinch-focal-point-midpoint-between-fingers-and-allows-smooth-reliable-zoom-out-back-to-the-full-view-the-zoom-behavior-must-feel-natural-for-a-coloring-app-users-can-zoom-into-the-intended-area-and-navigate-the-zoomed-canvas-without-losing-the-target-region",
+      "title": "Fix the Coloring Canvas touch gesture logic so that two-finger pinch zooms toward the pinch focal point (midpoint between fingers) and allows smooth, reliable zoom-out back to the full view. The zoom behavior must feel natural for a coloring app: users can zoom into the intended area and navigate the zoomed canvas without losing the target region.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-adjust-the-coloring-canvas-layout-interaction-implementation-in-the-existing-component-so-touch-handling-does-not-rely-on-browser-default-page-zoom-scroll-in-a-way-that-prevents-reaching-the-intended-zoom-target-ensure-touch-action-preventdefault-usage-is-correct-so-pinch-and-pan-affect-the-canvas-transform-rather-than-the-page",
+      "title": "Adjust the Coloring Canvas layout/interaction implementation (in the existing component) so touch handling does not rely on browser default page zoom/scroll in a way that prevents reaching the intended zoom target. Ensure touch-action / preventDefault usage is correct so pinch and pan affect the canvas transform rather than the page.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Fix Coloring Canvas touch gestures: pinch zoom should zoom toward the touched focal point and allow proper zoom-out (plus pan as needed) so users can zoom into the intended area.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "architecturalNotes": [
+    "React SPA without URL routing; navigation is controlled by App.tsx state (currentPage, selectedAge).",
+    "UI uses TailwindCSS with a playful OKLCH color palette, shadcn/ui components, lucide-react icons, and sonner for toast notifications.",
+    "Internationalization uses a LanguageContext with localStorage persistence and a translations dictionary; non-TR languages largely reuse the shared English strings (commonTranslations).",
+    "Data fetching uses @tanstack/react-query with domain-specific hooks (useGames, useQuizQuestions, etc.) and cache keys parameterized by age group and (where applicable) backend language.",
+    "ICP integration uses an InternetIdentityProvider (AuthClient) and a useActor hook that creates an anonymous or authenticated canister actor; actor changes trigger broad query invalidation/refetch.",
+    "Backend is a Motoko canister exposing query endpoints for games/quizzes/puzzles/tasks/sounds/coloring templates and a language-aware encouragement message generator; blob-storage mixin provides gateway authorization, dead-blob pruning, GC triggering, and cycles top-up via an external cashier canister principal env var.",
+    "Image caching is now implemented via imageCache + useImageCache utilities, enabling reuse/caching of generated/static image assets on the frontend.",
+    "Touch gesture handling in the Coloring Canvas needs adjustment: current two-finger pinch zoom does not correctly manage focal-point zooming and/or min/max scale + translation constraints, preventing zooming into the intended area or zooming back out."
+  ],
+  "knownIssues": [
+    "The Motoko backend defines multiple in-memory Maps (games, quizQuestions, memoryGames, logicPuzzles, visualRecognitionTasks, problemSolvingTasks, sounds, coloringTemplates) but no population logic in the provided backend/main.mo; most query endpoints will return empty arrays (except encouragement messages which are generated on the fly).",
+    "Several game components fetch backend data but do not use it meaningfully: MemoryCardGame fetches memory games but never uses them; VisualRecognitionGame fetches tasks but ignores them; LogicPuzzleGame and ProblemSolvingGame only use the first backend item when present.",
+    "There are two global CSS files (frontend/src/index.css and frontend/index.css) with different token sets; src/index.css is imported, but the extra file may confuse maintenance.",
+    "Backend getSoundsByCategory performs a redundant re-lookup (sounds.get(sound.name)) inside a loop over sounds.toArray(); filtering logic is inefficient and potentially incorrect depending on intended Map key usage.",
+    "Backend getEncouragementMessage only has rich message sets for Turkish/English (and a short French set); other languages fall back to a generic \"Well done!\" message.",
+    "Coloring Canvas: two-finger pinch zoom works but cannot zoom into the intended region and/or cannot zoom back out properly; gesture-to-transform (scale/translate) mapping is incorrect for coloring interaction."
+  ],
+  "isFixRequest": true,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/coloring-13-15-06-fox.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (13–15, #06 fox)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-13-15-07-spaceship.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (13–15, #07 spaceship)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-13-15-08-knight-helmet.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (13–15, #08 knight helmet)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-3-5-06-bunny.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (3–5, #06 bunny)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-3-5-07-dolphin.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (3–5, #07 dolphin)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-3-5-08-teddy.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (3–5, #08 teddy)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-6-8-06-panda.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (6–8, #06 panda)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-6-8-07-hot-air-balloon.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (6–8, #07 hot air balloon)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-6-8-08-castle.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (6–8, #08 castle)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-9-12-06-octopus.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (9–12, #06 octopus)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-9-12-07-planet.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (9–12, #07 planet)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    },
+    {
+      "filename": "frontend/public/assets/generated/coloring-9-12-08-skateboard.dim_2048x2048.png",
+      "description": "Additional fallback coloring template (9–12, #08 skateboard)",
+      "targetWidth": 2048,
+      "targetHeight": 2048
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "LearnFun",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0,
+  "requiresBackendChanges": false,
+  "requiresFrontendChanges": true
+}

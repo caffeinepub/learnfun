@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 1rem;
+        
+        /* Fun, vibrant color palette for children */
+        --fun-sky: oklch(0.85 0.12 220);
+        --fun-blue: oklch(0.65 0.20 240);
+        --fun-purple: oklch(0.55 0.25 280);
+        --fun-pink: oklch(0.75 0.20 340);
+        --fun-orange: oklch(0.70 0.22 40);
+        --fun-yellow: oklch(0.85 0.18 85);
+        
+        --background: oklch(0.98 0.01 280);
+        --foreground: oklch(0.20 0.02 280);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.20 0.02 280);
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.20 0.02 280);
+        --primary: oklch(0.55 0.25 280);
+        --primary-foreground: oklch(0.98 0.01 280);
+        --secondary: oklch(0.85 0.12 220);
+        --secondary-foreground: oklch(0.20 0.02 280);
+        --muted: oklch(0.95 0.01 280);
+        --muted-foreground: oklch(0.50 0.02 280);
+        --accent: oklch(0.70 0.22 40);
+        --accent-foreground: oklch(0.98 0.01 280);
+        --destructive: oklch(0.60 0.25 25);
+        --destructive-foreground: oklch(0.98 0.01 280);
+        --border: oklch(0.90 0.01 280);
+        --input: oklch(0.90 0.01 280);
+        --ring: oklch(0.55 0.25 280);
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+    }
+}
+
+@layer utilities {
+    .animate-bounce-slow {
+        animation: bounce 2s infinite;
+    }
+    
+    .animate-confetti {
+        animation: confetti-fall linear forwards;
+    }
+    
+    @keyframes confetti-fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+        }
+    }
+}
