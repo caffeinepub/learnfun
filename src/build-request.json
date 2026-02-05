@@ -1,48 +1,59 @@
 {
   "kind": "build_request",
-  "title": "Create Spanish (es) UI translation pack",
+  "title": "Add complete French (fr) and German (de) UI translation packs",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create a complete Spanish (es) translation pack for the UI by replacing the current `es: commonTranslations` fallback with an explicit Spanish dictionary in `frontend/src/lib/translations.ts` (i.e., provide Spanish values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist). Do not change other languages in this step.",
+      "text": "Create a complete French (fr) UI translation pack by replacing the current `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts` (i.e., provide French values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-messages"
         ],
         "quotes": [
-          "Önce sadece ispayolca çeviri dosyasını oluştur."
+          "Fransızca ve Almancayı da oluştur"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/lib/translations.ts` contains an `es` entry with Spanish translations (not a reference to `commonTranslations`).",
-        "All keys defined in `commonTranslations` have corresponding Spanish values in the `es` translation entry (no missing keys).",
-        "When selecting “Español” from the in-app language selector, key UI labels (e.g., Home, Welcome, Back, Loading, Game Zone, Quiz Zone, Coloring Section) display in Spanish instead of English."
+        "`frontend/src/lib/translations.ts` contains a `fr` entry with explicit French values for every key in `commonTranslations` (no spreading of `commonTranslations` for `fr`).",
+        "All existing keys in `commonTranslations` are present in `translations.fr` and translated to French.",
+        "Existing emojis/symbols (e.g., 🎉, ➡️, ⚡) remain present in the French strings where they exist in `commonTranslations`.",
+        "No non-French languages are modified except as necessary to add the explicit `fr` dictionary."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Create a complete German (de) UI translation pack by replacing the current `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts` (i.e., provide German values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages"
+        ],
+        "quotes": [
+          "Fransızca ve Almancayı da oluştur"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`frontend/src/lib/translations.ts` contains a `de` entry with explicit German values for every key in `commonTranslations` (no spreading of `commonTranslations` for `de`).",
+        "All existing keys in `commonTranslations` are present in `translations.de` and translated to German.",
+        "Existing emojis/symbols (e.g., 🎉, ➡️, ⚡) remain present in the German strings where they exist in `commonTranslations`.",
+        "No non-German languages are modified except as necessary to add the explicit `de` dictionary."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, `frontend/src/components/ui`.",
-    "Keep scope limited to Spanish (es) translations only; do not add/update other languages in this change."
+    "Use English for any user-facing text in this build request.",
+    "Do not edit any files under `frontend/src/components/ui` or other paths listed in `frontend.immutablePaths`.",
+    "Keep all translations limited to keys that already exist in `commonTranslations` (do not add/remove translation keys as part of this change)."
   ],
   "nonGoals": [
-    "Adding translation packs for other languages (tr/en/de/fr/it/ru/pt/zh/hi/etc.).",
-    "Changing backend language enums or backend localization behavior.",
-    "Refactoring the i18n system (e.g., splitting translations into multiple modules) beyond what is necessary to add the Spanish pack."
+    "Adding new languages beyond French (fr) and German (de).",
+    "Changing the language selector UI or language persistence behavior.",
+    "Adding/expanding localized fallback quiz question pools beyond the existing Turkish/English fallback data."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

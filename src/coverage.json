@@ -1,18 +1,29 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T18:50:40.041Z",
+  "generatedAt": "2026-02-05T19:01:10.623Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Create a complete Spanish (es) translation pack for the UI by replacing the current `es: commonTranslations` fallback with an explicit Spanish dictionary in `frontend/src/lib/translations.ts` (i.e., provide Spanish values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist). Do not change other languages in this step.",
+        "summary": "Create a complete French (fr) UI translation pack by replacing the current `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts` (i.e., provide French values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/translations.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/lib/translations.ts"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Create a complete German (de) UI translation pack by replacing the current `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts` (i.e., provide German values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/lib/translations.ts"
@@ -25,7 +36,6 @@
   },
   "changedFiles": [
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",

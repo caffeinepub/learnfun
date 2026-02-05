@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-complete-spanish-es-translation-pack-for-the-ui-by-replacing-the-current-es-commontranslations-fallback-with-an-explicit-spanish-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-spanish-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist-do-not-change-other-languages-in-this-step",
-      "featureTitle": "Create a complete Spanish (es) translation pack for the UI by replacing the current `es: commonTranslations` fallback with an explicit Spanish dictionary in `frontend/src/lib/translations.ts` (i.e., provide Spanish values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist). Do not change other languages in this step.",
+      "featureId": "feature-create-a-complete-french-fr-ui-translation-pack-by-replacing-the-current-fr-commontranslations-fallback-with-an-explicit-french-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-french-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
+      "featureTitle": "Create a complete French (fr) UI translation pack by replacing the current `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts` (i.e., provide French values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
       "files": [
         "frontend/src/lib/translations.ts"
       ],
@@ -17,6 +17,25 @@
       ],
       "testIds": [
         "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-complete-german-de-ui-translation-pack-by-replacing-the-current-de-commontranslations-fallback-with-an-explicit-german-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-german-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
+      "featureTitle": "Create a complete German (de) UI translation pack by replacing the current `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts` (i.e., provide German values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "files": [
+        "frontend/src/lib/translations.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "blob-storage@4.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
       ],
       "confidence": "high"
     }

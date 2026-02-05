@@ -1,13 +1,21 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T18:50:40.039Z",
-  "summary": "Diff does not provide sufficient evidence that the Spanish (es) translation pack was fully implemented as requested; the shown portion of `translations.ts` only includes `commonTranslations` and is truncated before any `es` entry is visible. Two non-requested metadata/summary files were also modified.",
+  "generatedAt": "2026-02-05T19:01:10.621Z",
+  "summary": "The diff shows edits to `frontend/src/lib/translations.ts`, but the provided truncated excerpt does not include the `translations` object entries for `fr` or `de`, so the requested explicit French/German dictionaries cannot be verified from the available evidence. Additionally, two non-requested files (`frontend-file-summaries.txt` and `project_state.json`) were modified.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Replace the current `es: commonTranslations` fallback with an explicit Spanish (`es`) dictionary in `frontend/src/lib/translations.ts`, providing Spanish values for all keys in `commonTranslations` (preserving emojis/icons) without changing other languages.",
-      "reason": "The diff snippet for `frontend/src/lib/translations.ts` only shows the `commonTranslations` object and is truncated before any language map/object where an explicit `es` dictionary would be visible. Therefore, it cannot be verified that `es` was changed from a fallback reference to a full Spanish dictionary, nor that all keys are covered.",
+      "requirement": "Replace the `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts`, providing French values for every existing key in `commonTranslations` (no spreading), preserving emojis/symbols.",
+      "reason": "The diff excerpt for `frontend/src/lib/translations.ts` is truncated and only shows the beginning of `commonTranslations`; it does not show any `fr` translation entry, so there is no evidence that `translations.fr` was changed from a fallback to an explicit French dictionary or that all keys/emojis were translated/preserved.",
+      "evidence": [
+        "frontend/src/lib/translations.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Replace the `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts`, providing German values for every existing key in `commonTranslations` (no spreading), preserving emojis/symbols.",
+      "reason": "The diff excerpt for `frontend/src/lib/translations.ts` is truncated and does not show any `de` translation entry, so there is no evidence that `translations.de` was changed from a fallback to an explicit German dictionary or that all keys/emojis were translated/preserved.",
       "evidence": [
         "frontend/src/lib/translations.ts (truncated)"
       ]
@@ -15,17 +23,17 @@
   ],
   "hallucinated_features": [
     {
-      "description": "Updated/added project tracking metadata in `project_state.json`.",
-      "reason": "BuildRequest only asks for adding an explicit Spanish translation pack in `frontend/src/lib/translations.ts` and explicitly limits scope; updating project state metadata is not requested.",
+      "description": "Modified `frontend-file-summaries.txt` to describe broad frontend behavior/features (e.g., new game types, daily surprise section, quiz randomization) beyond the requested translation-pack changes.",
+      "reason": "The BuildRequest only asks for adding explicit French and German translation dictionaries in `frontend/src/lib/translations.ts` and does not request updating summary/metadata files or documenting unrelated functionality.",
       "evidence": [
-        "project_state.json"
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Updated `frontend-file-summaries.txt` with broad claims about many frontend features/games and translation coverage.",
-      "reason": "BuildRequest does not request generating/updating documentation or summary files; scope is limited to Spanish translations only.",
+      "description": "Modified `project_state.json` to add/track new feature requests (AR-1/AR-2/AR-3) and mark them pending.",
+      "reason": "The BuildRequest does not request changes to project tracking/state files; only translation pack updates were requested.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "project_state.json"
       ]
     }
   ],

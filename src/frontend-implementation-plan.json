@@ -1,21 +1,39 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Create explicit Spanish (es) UI translation pack",
+  "title": "Add explicit French and German UI translation dictionaries",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace the current Spanish (es) fallback that references `commonTranslations` with a complete explicit Spanish dictionary covering every key in `commonTranslations`, preserving any emojis/icons, without changing other languages.",
+      "summary": "Replace the French (fr) fallback with a complete explicit French dictionary for all existing common UI keys.",
       "acceptanceCriteria": [
-        "`frontend/src/lib/translations.ts` contains an `es` entry with Spanish translations (not a reference to `commonTranslations`).",
-        "All keys defined in `commonTranslations` have corresponding Spanish values in the `es` translation entry (no missing keys).",
-        "When selecting “Español” from the in-app language selector, key UI labels (e.g., Home, Welcome, Back, Loading, Game Zone, Quiz Zone, Coloring Section) display in Spanish instead of English."
+        "`frontend/src/lib/translations.ts` contains a `fr` entry with explicit French values for every key in `commonTranslations` (no spreading of `commonTranslations` for `fr`).",
+        "All existing keys in `commonTranslations` are present in `translations.fr` and translated to French.",
+        "Existing emojis/symbols (e.g., 🎉, ➡️, ⚡) remain present in the French strings where they exist in `commonTranslations`.",
+        "No non-French languages are modified except as necessary to add the explicit `fr` dictionary."
       ],
       "file_operations": [
         {
           "path": "frontend/src/lib/translations.ts",
           "operation": "modify",
-          "description": "Replace `es: commonTranslations` with an explicit `es: { ... }` dictionary containing Spanish values for every key currently in `commonTranslations` (ensure no missing keys, keep any existing emojis/icons in the values, and do not modify any non-`es` language entries)."
+          "description": "Replace `fr: commonTranslations` with an explicit `fr` dictionary containing French translations for every key currently in `commonTranslations`, preserving existing emojis/icons and keeping the translation key set identical (no added/removed keys)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Replace the German (de) fallback with a complete explicit German dictionary for all existing common UI keys.",
+      "acceptanceCriteria": [
+        "`frontend/src/lib/translations.ts` contains a `de` entry with explicit German values for every key in `commonTranslations` (no spreading of `commonTranslations` for `de`).",
+        "All existing keys in `commonTranslations` are present in `translations.de` and translated to German.",
+        "Existing emojis/symbols (e.g., 🎉, ➡️, ⚡) remain present in the German strings where they exist in `commonTranslations`.",
+        "No non-German languages are modified except as necessary to add the explicit `de` dictionary."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/translations.ts",
+          "operation": "modify",
+          "description": "Replace `de: commonTranslations` with an explicit `de` dictionary containing German translations for every key currently in `commonTranslations`, preserving existing emojis/icons and keeping the translation key set identical (no added/removed keys)."
         }
       ]
     }

@@ -1,21 +1,26 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Uygulamanın dil seçimi değiştiğinde tüm UI metinlerinin seçilen dile dönüştüğü, çok dilli (i18n) tam çeviri paketleriyle çalışan bir dil sistemi hedefleniyor. İlk adım olarak tek tek dil çeviri dosyaları (başlangıç: İspanyolca) oluşturulacak.",
+  "summary": "Localization project: add and maintain translation files for multiple languages.",
   "architectural_notes": [
-    "Çeviri sistemi şu an eksik dillerde İngilizceye fallback yapıyor; hedef her dil için ayrı çeviri dosyaları ve dil değişiminde anında tüm UI metinlerinin güncellenmesi."
+    "Maintain separate translation files per language (e.g., Spanish, French, German)."
   ],
-  "known_issues": [
-    "Dil sekmesi: Türkçe/İngilizce dışındaki diller seçilince içerik İngilizceye dönüyor (eksik çeviri dosyaları nedeniyle fallback).",
-    "Kapsamlı çok-dilli çeviri dosyası üretim istekleri derleme/uygulama adımında hata veriyor (istek tek seferde çok büyük)."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-create-a-complete-spanish-es-translation-pack-for-the-ui-by-replacing-the-current-es-commontranslations-fallback-with-an-explicit-spanish-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-spanish-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist-do-not-change-other-languages-in-this-step",
-      "title": "Create a complete Spanish (es) translation pack for the UI by replacing the current `es: commonTranslations` fallback with an explicit Spanish dictionary in `frontend/src/lib/translations.ts` (i.e., provide Spanish values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist). Do not change other languages in this step.",
+      "id": "feature-create-a-complete-french-fr-ui-translation-pack-by-replacing-the-current-fr-commontranslations-fallback-with-an-explicit-french-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-french-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
+      "title": "Create a complete French (fr) UI translation pack by replacing the current `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts` (i.e., provide French values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
       "reqIds": [
         "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-complete-german-de-ui-translation-pack-by-replacing-the-current-de-commontranslations-fallback-with-an-explicit-german-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-german-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
+      "title": "Create a complete German (de) UI translation pack by replacing the current `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts` (i.e., provide German values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "reqIds": [
+        "REQ-2"
       ],
       "version": 1
     }
@@ -23,18 +28,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Dil değiştiğinde tüm UI'nin seçilen dile dönmesi için çok dilli (i18n) tam çeviri desteği ekle (tr, en, de, fr, zh, pt, es, it, hi, ru).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "İspanyolca (es) için çeviri dosyasını/pack'ini oluştur (diğer dillere geçmeden önce ilk adım).",
+      "summary": "Add French and German language translation files (localization support)",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Create Spanish (es) UI translation pack",
+  "projectName": "Add complete French (fr) and German (de) UI translation packs",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
