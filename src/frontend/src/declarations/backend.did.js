@@ -162,6 +162,11 @@ export const idlService = IDL.Service({
       [IDL.Opt(ExternalBlob)],
       ['query'],
     ),
+  'getRandomizedQuizQuestions' : IDL.Func(
+      [IDL.Text, Language, IDL.Nat],
+      [IDL.Vec(SimpleQuestion)],
+      ['query'],
+    ),
   'getSoundByName' : IDL.Func([IDL.Text], [IDL.Opt(ExternalBlob)], ['query']),
   'getSoundCategories' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
   'getSoundsByCategory' : IDL.Func(
@@ -335,6 +340,11 @@ export const idlFactory = ({ IDL }) => {
     'getRandomSoundByCategory' : IDL.Func(
         [IDL.Text],
         [IDL.Opt(ExternalBlob)],
+        ['query'],
+      ),
+    'getRandomizedQuizQuestions' : IDL.Func(
+        [IDL.Text, Language, IDL.Nat],
+        [IDL.Vec(SimpleQuestion)],
         ['query'],
       ),
     'getSoundByName' : IDL.Func([IDL.Text], [IDL.Opt(ExternalBlob)], ['query']),

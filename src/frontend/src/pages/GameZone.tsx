@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useGames } from '../hooks/useQueries';
 import ShapeMatchingGame from '../components/games/ShapeMatchingGame';
 import MathPuzzleGame from '../components/games/MathPuzzleGame';
@@ -9,16 +9,19 @@ import MemoryCardGame from '../components/games/MemoryCardGame';
 import LogicPuzzleGame from '../components/games/LogicPuzzleGame';
 import VisualRecognitionGame from '../components/games/VisualRecognitionGame';
 import ProblemSolvingGame from '../components/games/ProblemSolvingGame';
+import SortingClassificationGame from '../components/games/SortingClassificationGame';
+import QuickReactionTapGame from '../components/games/QuickReactionTapGame';
 import CelebrationModal from '../components/CelebrationModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../lib/translations';
+import { getDailySurpriseGame } from '../lib/dailySurprise';
 
 interface GameZoneProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
   onBack: () => void;
 }
 
-type GameType = 'shape-matching' | 'math-puzzle' | 'memory-card' | 'logic-puzzle' | 'visual-recognition' | 'problem-solving';
+type GameType = 'shape-matching' | 'math-puzzle' | 'memory-card' | 'logic-puzzle' | 'visual-recognition' | 'problem-solving' | 'sorting-classification' | 'quick-reaction-tap';
 
 export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
   const { language } = useLanguage();
@@ -27,6 +30,8 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [completedLevel, setCompletedLevel] = useState(1);
+
+  const dailySurpriseGame = getDailySurpriseGame(ageGroup);
 
   const handleGameComplete = (level: number) => {
     setCompletedLevel(level);
@@ -151,6 +156,40 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
     );
   }
 
+  if (selectedGame === 'sorting-classification') {
+    return (
+      <>
+        <SortingClassificationGame 
+          ageGroup={ageGroup} 
+          onBack={() => setSelectedGame(null)}
+          onComplete={handleGameComplete}
+        />
+        <CelebrationModal 
+          isOpen={showCelebration}
+          onClose={handleCelebrationClose}
+          level={completedLevel}
+        />
+      </>
+    );
+  }
+
+  if (selectedGame === 'quick-reaction-tap') {
+    return (
+      <>
+        <QuickReactionTapGame 
+          ageGroup={ageGroup} 
+          onBack={() => setSelectedGame(null)}
+          onComplete={handleGameComplete}
+        />
+        <CelebrationModal 
+          isOpen={showCelebration}
+          onClose={handleCelebrationClose}
+          level={completedLevel}
+        />
+      </>
+    );
+  }
+
   const gamesList = [
     { id: 'shape-matching', name: games?.[0]?.name || t.shapeMatching, description: games?.[0]?.description || t.findMatchingShapes, image: '/assets/generated/colorful-shapes.dim_400x300.png' },
     { id: 'math-puzzle', name: t.colorfulMath, description: t.solveAndFind, image: '/assets/generated/happy-numbers.dim_600x400.png' },
@@ -158,7 +197,11 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
     { id: 'logic-puzzle', name: t.logicPuzzle, description: t.logicPuzzleDesc, image: '/assets/generated/logic-puzzle-pieces.dim_400x300.png' },
     { id: 'visual-recognition', name: t.visualRecognition, description: t.visualRecognitionDesc, image: '/assets/generated/visual-recognition-scene.dim_600x400.png' },
     { id: 'problem-solving', name: t.problemSolving, description: t.problemSolvingDesc, image: '/assets/generated/problem-solving-scene.dim_500x300.png' },
+    { id: 'sorting-classification', name: t.sortingGame, description: t.sortingGameDesc, image: '/assets/generated/sorting-classification-game-card.dim_600x400.png' },
+    { id: 'quick-reaction-tap', name: t.reactionGame, description: t.reactionGameDesc, image: '/assets/generated/quick-reaction-tap-game-card.dim_600x400.png' },
   ];
+
+  const dailySurpriseGameData = gamesList.find(g => g.id === dailySurpriseGame);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500">
@@ -175,6 +218,40 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
           🎮 {t.gameZone}
         </h1>
       </div>
+
+      {dailySurpriseGameData && (
+        <Card className="bg-gradient-to-r from-fun-yellow via-fun-orange to-fun-pink border-4 border-white shadow-2xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-shrink-0">
+                <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-12 h-12 text-fun-orange" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
+                  ✨ {t.dailySurpriseTitle}
+                </h2>
+                <p className="text-lg text-white/90 font-semibold mb-1">
+                  {t.dailySurpriseSubtitle}
+                </p>
+                <p className="text-xl font-bold text-white">
+                  {dailySurpriseGameData.name}
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Button
+                  onClick={() => setSelectedGame(dailySurpriseGame)}
+                  size="lg"
+                  className="h-14 px-8 text-xl font-bold bg-white text-fun-purple hover:bg-white/90 shadow-xl"
+                >
+                  {t.dailySurprisePlay}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {gamesList.map((game) => (

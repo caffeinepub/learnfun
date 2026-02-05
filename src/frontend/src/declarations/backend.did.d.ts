@@ -123,6 +123,10 @@ export interface _SERVICE {
   'getProblemSolvingTasks' : ActorMethod<[string], Array<ProblemSolving>>,
   'getQuizQuestions' : ActorMethod<[string, Language], Array<SimpleQuestion>>,
   'getRandomSoundByCategory' : ActorMethod<[string], [] | [ExternalBlob]>,
+  'getRandomizedQuizQuestions' : ActorMethod<
+    [string, Language, bigint],
+    Array<SimpleQuestion>
+  >,
   'getSoundByName' : ActorMethod<[string], [] | [ExternalBlob]>,
   'getSoundCategories' : ActorMethod<[], Array<string>>,
   'getSoundsByCategory' : ActorMethod<[string], Array<[string, ExternalBlob]>>,

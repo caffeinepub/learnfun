@@ -1,39 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Coloring Canvas pinch-zoom focal-point behavior and stabilize touch interactions",
+  "title": "Create explicit Spanish (es) UI translation pack",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Update Coloring Canvas gesture logic so pinch-zoom centers on the pinch midpoint, supports smooth zoom-out back to 1x, and enables touch-friendly navigation of the zoomed canvas while keeping single-finger drawing dedicated to coloring.",
+      "summary": "Replace the current Spanish (es) fallback that references `commonTranslations` with a complete explicit Spanish dictionary covering every key in `commonTranslations`, preserving any emojis/icons, without changing other languages.",
       "acceptanceCriteria": [
-        "On touch devices, a two-finger pinch gesture zooms in/out centered around the pinch midpoint (the content under the midpoint stays under the midpoint as scale changes).",
-        "Zoom-out via pinch works consistently and can return to the default full view (1x) without getting stuck.",
-        "The user can reposition the zoomed canvas in a touch-friendly way (e.g., two-finger pan or equivalent) so they can reach any area after zooming in.",
-        "Single-finger touch remains dedicated to drawing (no accidental pan/zoom while drawing).",
-        "Existing zoom controls (buttons and double-tap zoom toggle) continue to work and do not conflict with pinch gestures."
+        "`frontend/src/lib/translations.ts` contains an `es` entry with Spanish translations (not a reference to `commonTranslations`).",
+        "All keys defined in `commonTranslations` have corresponding Spanish values in the `es` translation entry (no missing keys).",
+        "When selecting “Español” from the in-app language selector, key UI labels (e.g., Home, Welcome, Back, Loading, Game Zone, Quiz Zone, Coloring Section) display in Spanish instead of English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/coloring/ColoringCanvas.tsx",
+          "path": "frontend/src/lib/translations.ts",
           "operation": "modify",
-          "description": "Implement two-finger pinch gesture state tracking (distance + midpoint) and update zoom + scroll/viewport positioning so scaling occurs toward the pinch focal point. Replace the current transform-only zoom approach with a scroll-area-aware zoom sizing strategy (so the scrollable area expands/contracts with zoom), and compute scroll adjustments so the content under the pinch midpoint remains anchored. Ensure pinch can smoothly return to 1x and that two-finger midpoint movement naturally pans the zoomed canvas, while preventing any single-finger drawing interaction from triggering pan/zoom."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Correct Coloring Canvas layout and touch handling so the browser page does not capture pinch/scroll gestures; ensure touch-action and preventDefault usage stabilizes continuous pinch/pan without jitter or jumps.",
-      "acceptanceCriteria": [
-        "Pinch-zoom and pan manipulate only the coloring canvas viewport (not the browser page zoom).",
-        "No jittering/fighting between container scrolling and gesture-based zoom/pan while interacting with the canvas.",
-        "Zoom state remains stable across continuous pinch gestures (no sudden jumps in scale or position)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/coloring/ColoringCanvas.tsx",
-          "operation": "modify",
-          "description": "Adjust the canvas container and canvas element touch configuration to prevent browser default pinch-zoom/scroll from interfering (e.g., apply appropriate touch-action/overscroll behavior and use non-passive event handling where needed). Ensure preventDefault is applied only for two-finger gesture interactions (pinch/pan) and for drawing strokes as appropriate, avoiding conflicts that cause scale/position jumps across continuous gestures."
+          "description": "Replace `es: commonTranslations` with an explicit `es: { ... }` dictionary containing Spanish values for every key currently in `commonTranslations` (ensure no missing keys, keep any existing emojis/icons in the values, and do not modify any non-`es` language entries)."
         }
       ]
     }

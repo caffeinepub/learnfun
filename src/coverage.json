@@ -1,45 +1,35 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-03T17:44:24.356Z",
+  "generatedAt": "2026-02-05T18:50:40.041Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Coloring Canvas touch gesture logic so that two-finger pinch zooms toward the pinch focal point (midpoint between fingers) and allows smooth, reliable zoom-out back to the full view. The zoom behavior must feel natural for a coloring app: users can zoom into the intended area and navigate the zoomed canvas without losing the target region.",
+        "summary": "Create a complete Spanish (es) translation pack for the UI by replacing the current `es: commonTranslations` fallback with an explicit Spanish dictionary in `frontend/src/lib/translations.ts` (i.e., provide Spanish values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist). Do not change other languages in this step.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/coloring/ColoringCanvas.tsx"
+          "frontend/src/lib/translations.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/coloring/ColoringCanvas.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Adjust the Coloring Canvas layout/interaction implementation (in the existing component) so touch handling does not rely on browser default page zoom/scroll in a way that prevents reaching the intended zoom target. Ensure touch-action / preventDefault usage is correct so pinch and pan affect the canvas transform rather than the page.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/coloring/ColoringCanvas.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/coloring/ColoringCanvas.tsx"
+          "frontend/src/lib/translations.ts"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/coloring/ColoringCanvas.tsx",
+    "frontend/src/lib/translations.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

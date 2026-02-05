@@ -97,6 +97,7 @@ export interface backendInterface {
     getProblemSolvingTasks(ageGroup: string): Promise<Array<ProblemSolving>>;
     getQuizQuestions(ageGroup: string, language: Language): Promise<Array<SimpleQuestion>>;
     getRandomSoundByCategory(categoryName: string): Promise<ExternalBlob | null>;
+    getRandomizedQuizQuestions(ageGroup: string, language: Language, count: bigint): Promise<Array<SimpleQuestion>>;
     getSoundByName(soundName: string): Promise<ExternalBlob | null>;
     getSoundCategories(): Promise<Array<string>>;
     getSoundsByCategory(categoryName: string): Promise<Array<[string, ExternalBlob]>>;

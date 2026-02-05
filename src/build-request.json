@@ -1,58 +1,48 @@
 {
   "kind": "build_request",
-  "title": "Fix Coloring Canvas pinch-zoom to zoom toward the touched area and allow reliable zoom-out",
+  "title": "Create Spanish (es) UI translation pack",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Coloring Canvas touch gesture logic so that two-finger pinch zooms toward the pinch focal point (midpoint between fingers) and allows smooth, reliable zoom-out back to the full view. The zoom behavior must feel natural for a coloring app: users can zoom into the intended area and navigate the zoomed canvas without losing the target region.",
+      "text": "Create a complete Spanish (es) translation pack for the UI by replacing the current `es: commonTranslations` fallback with an explicit Spanish dictionary in `frontend/src/lib/translations.ts` (i.e., provide Spanish values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist). Do not change other languages in this step.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Boyama alanında söyle bir sorun var iki parmakla dokunarak yaklaşıyor ama istenilen alana yakınlaşamıyor ya da uzaklaşılamıyor. buradaki sorunu boyama mantığına uygun olarak çmz"
+          "Önce sadece ispayolca çeviri dosyasını oluştur."
         ]
       },
       "acceptanceCriteria": [
-        "On touch devices, a two-finger pinch gesture zooms in/out centered around the pinch midpoint (the content under the midpoint stays under the midpoint as scale changes).",
-        "Zoom-out via pinch works consistently and can return to the default full view (1x) without getting stuck.",
-        "The user can reposition the zoomed canvas in a touch-friendly way (e.g., two-finger pan or equivalent) so they can reach any area after zooming in.",
-        "Single-finger touch remains dedicated to drawing (no accidental pan/zoom while drawing).",
-        "Existing zoom controls (buttons and double-tap zoom toggle) continue to work and do not conflict with pinch gestures."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Adjust the Coloring Canvas layout/interaction implementation (in the existing component) so touch handling does not rely on browser default page zoom/scroll in a way that prevents reaching the intended zoom target. Ensure touch-action / preventDefault usage is correct so pinch and pan affect the canvas transform rather than the page.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "iki parmakla dokunarak yaklaşıyor ama istenilen alana yakınlaşamıyor ya da uzaklaşılamıyor"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Pinch-zoom and pan manipulate only the coloring canvas viewport (not the browser page zoom).",
-        "No jittering/fighting between container scrolling and gesture-based zoom/pan while interacting with the canvas.",
-        "Zoom state remains stable across continuous pinch gestures (no sudden jumps in scale or position)."
+        "`frontend/src/lib/translations.ts` contains an `es` entry with Spanish translations (not a reference to `commonTranslations`).",
+        "All keys defined in `commonTranslations` have corresponding Spanish values in the `es` translation entry (no missing keys).",
+        "When selecting “Español” from the in-app language selector, key UI labels (e.g., Home, Welcome, Back, Loading, Game Zone, Quiz Zone, Coloring Section) display in Spanish instead of English."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/components/ui or any paths listed in frontend.immutablePaths.",
-    "Keep all changes within the existing React + TypeScript + Tailwind codebase (no new frameworks)."
+    "Frontend immutable paths must not be edited: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, `frontend/src/components/ui`.",
+    "Keep scope limited to Spanish (es) translations only; do not add/update other languages in this change."
   ],
   "nonGoals": [
-    "Do not add new backend APIs or change the Motoko canister.",
-    "Do not add new coloring templates or image assets.",
-    "Do not add user save/load features for drawings."
+    "Adding translation packs for other languages (tr/en/de/fr/it/ru/pt/zh/hi/etc.).",
+    "Changing backend language enums or backend localization behavior.",
+    "Refactoring the i18n system (e.g., splitting translations into multiple modules) beyond what is necessary to add the Spanish pack."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

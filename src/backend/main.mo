@@ -3,6 +3,9 @@ import Map "mo:core/Map";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import Iter "mo:core/Iter";
+import Int "mo:core/Int";
+import Nat "mo:core/Nat";
+import Array "mo:core/Array";
 
 
 
@@ -177,6 +180,37 @@ actor {
     };
   };
 
+  func shuffleArray<T>(array : [T]) : [T] {
+    let size = array.size();
+    if (size <= 1) { return array };
+
+    let seed = 1000;
+    let randomIndex = func(i : Nat) : Nat {
+      let randomInt = 100;
+      let j = Int.abs(randomInt % (size.toInt())) % (i + 1);
+      j;
+    };
+
+    let result = array.toVarArray();
+    var i = size - 1;
+    while (i > 0) {
+      let j = randomIndex(i);
+      if (j != i) {
+        let temp = result[i];
+        result[i] := result[j];
+        result[j] := temp;
+      };
+      i -= 1;
+    };
+    result.toArray();
+  };
+
+  func take<T>(array : [T], count : Nat) : [T] {
+    let size = array.size();
+    if (count >= size) { return array };
+    Array.tabulate<T>(count, func(i) { array[i] });
+  };
+
   public query ({}) func getQuizQuestions(ageGroup : Text, language : Language) : async [SimpleQuestion] {
     let questions = switch (quizQuestions.get(ageGroup)) {
       case (null) { [] };
@@ -220,6 +254,24 @@ actor {
     switch (problemSolvingTasks.get(ageGroup)) {
       case (null) { [] };
       case (?tasks) { tasks };
+    };
+  };
+
+  public query ({}) func getRandomizedQuizQuestions(ageGroup : Text, language : Language, count : Nat) : async [SimpleQuestion] {
+    let questions = switch (quizQuestions.get(ageGroup)) {
+      case (null) { return [] };
+      case (?questions) { questions };
+    };
+
+    if (questions.size() == 0) { return [] };
+
+    let converted = questions.map(func(q) { convertQuestion(q, language) });
+
+    let shuffled = shuffleArray(converted);
+    if (shuffled.size() <= count) {
+      shuffled;
+    } else {
+      take(shuffled, count);
     };
   };
 

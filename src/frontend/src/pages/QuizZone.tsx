@@ -2,12 +2,18 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
-import { useQuizQuestions } from '../hooks/useQueries';
+import { useRandomizedQuizQuestions } from '../hooks/useRandomizedQuizQuestions';
 import { Progress } from '@/components/ui/progress';
 import CelebrationModal from '../components/CelebrationModal';
 import { toast } from 'sonner';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../lib/translations';
+import { getFallbackQuizQuestions } from '../lib/fallbackQuizQuestions';
+import {
+  selectQuestionsWithHistory,
+  updateQuizHistory,
+  getSessionSize,
+} from '../lib/quizQuestionSelection';
 
 interface QuizZoneProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
@@ -23,93 +29,21 @@ type QuizQuestion = {
 export default function QuizZone({ ageGroup, onBack }: QuizZoneProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
-  const { data: backendQuestions, isLoading } = useQuizQuestions(ageGroup);
+  const sessionSize = getSessionSize();
+  
+  const { data: backendQuestions, isLoading } = useRandomizedQuizQuestions(ageGroup, sessionSize);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [sessionKey, setSessionKey] = useState(0); // Force re-initialization on restart
 
-  // Generate fallback quiz questions based on age group and language
-  const generateQuizQuestions = (): QuizQuestion[] => {
-    const quizData = {
-      tr: {
-        '3-5': [
-          { question: 'Hangi hayvan miyavlar?', options: ['Kedi', 'Köpek', 'Kuş'], correctAnswer: 'Kedi' },
-          { question: 'Kaç tane parmağın var?', options: ['5', '10', '20'], correctAnswer: '10' },
-          { question: 'Güneş hangi renktir?', options: ['Sarı', 'Mavi', 'Yeşil'], correctAnswer: 'Sarı' },
-          { question: 'Hangi şekil yuvarlaktır?', options: ['Daire', 'Kare', 'Üçgen'], correctAnswer: 'Daire' },
-          { question: 'Hangi hayvan havlar?', options: ['Köpek', 'Kedi', 'Kuş'], correctAnswer: 'Köpek' },
-        ],
-        '6-8': [
-          { question: '5 + 3 = ?', options: ['7', '8', '9'], correctAnswer: '8' },
-          { question: 'Bir haftada kaç gün var?', options: ['5', '6', '7'], correctAnswer: '7' },
-          { question: 'Hangi mevsim en sıcaktır?', options: ['Yaz', 'Kış', 'Sonbahar'], correctAnswer: 'Yaz' },
-          { question: '10 - 4 = ?', options: ['5', '6', '7'], correctAnswer: '6' },
-          { question: 'Hangi hayvan denizde yaşar?', options: ['Balık', 'Kedi', 'Köpek'], correctAnswer: 'Balık' },
-          { question: 'Bir günde kaç saat var?', options: ['12', '24', '48'], correctAnswer: '24' },
-        ],
-        '9-12': [
-          { question: '12 × 3 = ?', options: ['34', '36', '38'], correctAnswer: '36' },
-          { question: 'Türkiye\'nin başkenti neresidir?', options: ['İstanbul', 'Ankara', 'İzmir'], correctAnswer: 'Ankara' },
-          { question: '50 ÷ 5 = ?', options: ['8', '10', '12'], correctAnswer: '10' },
-          { question: 'Bir yılda kaç ay var?', options: ['10', '11', '12'], correctAnswer: '12' },
-          { question: 'Hangi gezegen Güneş\'e en yakındır?', options: ['Merkür', 'Venüs', 'Dünya'], correctAnswer: 'Merkür' },
-          { question: '15 + 27 = ?', options: ['40', '42', '44'], correctAnswer: '42' },
-        ],
-        '13-15': [
-          { question: '144 ÷ 12 = ?', options: ['10', '11', '12'], correctAnswer: '12' },
-          { question: 'Hangi element su molekülünde bulunur?', options: ['Hidrojen', 'Karbon', 'Azot'], correctAnswer: 'Hidrojen' },
-          { question: '2³ = ?', options: ['6', '8', '9'], correctAnswer: '8' },
-          { question: 'Fotosent hangi organelde gerçekleşir?', options: ['Kloroplast', 'Mitokondri', 'Ribozom'], correctAnswer: 'Kloroplast' },
-          { question: '√64 = ?', options: ['6', '7', '8'], correctAnswer: '8' },
-          { question: 'Hangi yıl Cumhuriyet ilan edildi?', options: ['1920', '1923', '1925'], correctAnswer: '1923' },
-        ],
-      },
-      en: {
-        '3-5': [
-          { question: 'Which animal meows?', options: ['Cat', 'Dog', 'Bird'], correctAnswer: 'Cat' },
-          { question: 'How many fingers do you have?', options: ['5', '10', '20'], correctAnswer: '10' },
-          { question: 'What color is the sun?', options: ['Yellow', 'Blue', 'Green'], correctAnswer: 'Yellow' },
-          { question: 'Which shape is round?', options: ['Circle', 'Square', 'Triangle'], correctAnswer: 'Circle' },
-          { question: 'Which animal barks?', options: ['Dog', 'Cat', 'Bird'], correctAnswer: 'Dog' },
-        ],
-        '6-8': [
-          { question: '5 + 3 = ?', options: ['7', '8', '9'], correctAnswer: '8' },
-          { question: 'How many days in a week?', options: ['5', '6', '7'], correctAnswer: '7' },
-          { question: 'Which season is hottest?', options: ['Summer', 'Winter', 'Fall'], correctAnswer: 'Summer' },
-          { question: '10 - 4 = ?', options: ['5', '6', '7'], correctAnswer: '6' },
-          { question: 'Which animal lives in the sea?', options: ['Fish', 'Cat', 'Dog'], correctAnswer: 'Fish' },
-          { question: 'How many hours in a day?', options: ['12', '24', '48'], correctAnswer: '24' },
-        ],
-        '9-12': [
-          { question: '12 × 3 = ?', options: ['34', '36', '38'], correctAnswer: '36' },
-          { question: 'What is the capital of France?', options: ['London', 'Paris', 'Berlin'], correctAnswer: 'Paris' },
-          { question: '50 ÷ 5 = ?', options: ['8', '10', '12'], correctAnswer: '10' },
-          { question: 'How many months in a year?', options: ['10', '11', '12'], correctAnswer: '12' },
-          { question: 'Which planet is closest to the Sun?', options: ['Mercury', 'Venus', 'Earth'], correctAnswer: 'Mercury' },
-          { question: '15 + 27 = ?', options: ['40', '42', '44'], correctAnswer: '42' },
-        ],
-        '13-15': [
-          { question: '144 ÷ 12 = ?', options: ['10', '11', '12'], correctAnswer: '12' },
-          { question: 'Which element is in water?', options: ['Hydrogen', 'Carbon', 'Nitrogen'], correctAnswer: 'Hydrogen' },
-          { question: '2³ = ?', options: ['6', '8', '9'], correctAnswer: '8' },
-          { question: 'Where does photosynthesis occur?', options: ['Chloroplast', 'Mitochondria', 'Ribosome'], correctAnswer: 'Chloroplast' },
-          { question: '√64 = ?', options: ['6', '7', '8'], correctAnswer: '8' },
-          { question: 'What year was the UN founded?', options: ['1943', '1945', '1947'], correctAnswer: '1945' },
-        ],
-      },
-    };
-
-    const langData = quizData[language as 'tr' | 'en'] || quizData.en;
-    return langData[ageGroup] || langData['6-8'];
-  };
-
-  // Initialize questions from backend or generate fallback
+  // Initialize questions from backend or generate fallback with history-aware selection
   useEffect(() => {
+    // Try backend first
     if (backendQuestions && backendQuestions.length > 0) {
-      // Use backend questions if available
       const formattedQuestions = backendQuestions
         .filter(q => q.question && q.correctAnswer && q.options.length > 0)
         .map(q => ({
@@ -124,9 +58,20 @@ export default function QuizZone({ ageGroup, onBack }: QuizZoneProps) {
       }
     }
     
-    // Generate fallback questions
-    setQuestions(generateQuizQuestions());
-  }, [backendQuestions, ageGroup, language]);
+    // Fallback to frontend pool with history-aware selection
+    const fallbackPool = getFallbackQuizQuestions(ageGroup, language);
+    const { selected, selectedIndices } = selectQuestionsWithHistory(
+      fallbackPool,
+      ageGroup,
+      language,
+      sessionSize
+    );
+    
+    setQuestions(selected);
+    
+    // Update history after selection
+    updateQuizHistory(ageGroup, language, selectedIndices);
+  }, [backendQuestions, ageGroup, language, sessionSize, sessionKey]);
 
   if (isLoading) {
     return (
@@ -195,6 +140,7 @@ export default function QuizZone({ ageGroup, onBack }: QuizZoneProps) {
     setShowResult(false);
     setScore(0);
     setShowCelebration(false);
+    setSessionKey(prev => prev + 1); // Trigger new question selection
   };
 
   return (

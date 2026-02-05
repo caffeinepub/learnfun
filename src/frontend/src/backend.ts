@@ -189,6 +189,7 @@ export interface backendInterface {
     getProblemSolvingTasks(ageGroup: string): Promise<Array<ProblemSolving>>;
     getQuizQuestions(ageGroup: string, language: Language): Promise<Array<SimpleQuestion>>;
     getRandomSoundByCategory(categoryName: string): Promise<ExternalBlob | null>;
+    getRandomizedQuizQuestions(ageGroup: string, language: Language, count: bigint): Promise<Array<SimpleQuestion>>;
     getSoundByName(soundName: string): Promise<ExternalBlob | null>;
     getSoundCategories(): Promise<Array<string>>;
     getSoundsByCategory(categoryName: string): Promise<Array<[string, ExternalBlob]>>;
@@ -433,6 +434,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getRandomSoundByCategory(arg0);
             return from_candid_opt_n35(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getRandomizedQuizQuestions(arg0: string, arg1: Language, arg2: bigint): Promise<Array<SimpleQuestion>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRandomizedQuizQuestions(arg0, to_candid_Language_n21(this._uploadFile, this._downloadFile, arg1), arg2);
+                return from_candid_vec_n32(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRandomizedQuizQuestions(arg0, to_candid_Language_n21(this._uploadFile, this._downloadFile, arg1), arg2);
+            return from_candid_vec_n32(this._uploadFile, this._downloadFile, result);
         }
     }
     async getSoundByName(arg0: string): Promise<ExternalBlob | null> {

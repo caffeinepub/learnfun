@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Palette } from 'lucide-react';
+import { ArrowLeft, Palette, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../lib/translations';
 import { useColoringTemplates } from '../hooks/useQueries';
@@ -26,12 +26,19 @@ export default function ColoringZone({ ageGroup, onBack }: ColoringZoneProps) {
   const t = useTranslation(language);
   const { data: backendTemplates, isLoading } = useColoringTemplates(ageGroup);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateItem | null>(null);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   // Use backend templates if available, otherwise use fallback templates
   const templates: TemplateItem[] = 
     backendTemplates && backendTemplates.length > 0 
       ? backendTemplates 
       : getFallbackTemplates(ageGroup);
+
+  const handleImageError = (templateId: string) => {
+    setFailedImages(prev => new Set(prev).add(templateId));
+  };
+
+  const isImageFailed = (templateId: string) => failedImages.has(templateId);
 
   if (selectedTemplate) {
     return (
@@ -89,26 +96,44 @@ export default function ColoringZone({ ageGroup, onBack }: ColoringZoneProps) {
                 const imageUrl = isFallbackTemplate(template) 
                   ? template.imageUrl 
                   : template.template.getDirectURL();
+                const isFailed = isImageFailed(templateId);
 
                 return (
                   <Card
                     key={templateId}
-                    className="border-4 border-fun-orange hover:border-fun-pink hover:scale-105 transition-all cursor-pointer shadow-lg group"
-                    onClick={() => setSelectedTemplate(template)}
+                    className={`border-4 ${
+                      isFailed 
+                        ? 'border-gray-300 opacity-60 cursor-not-allowed' 
+                        : 'border-fun-orange hover:border-fun-pink hover:scale-105 cursor-pointer'
+                    } transition-all shadow-lg group`}
+                    onClick={() => !isFailed && setSelectedTemplate(template)}
                   >
                     <CardContent className="p-6">
-                      <div className="aspect-square bg-white rounded-lg overflow-hidden mb-4 border-2 border-gray-200">
-                        <img
-                          src={imageUrl}
-                          alt={`Template ${templateId}`}
-                          className="w-full h-full object-contain"
-                        />
+                      <div className="aspect-square bg-white rounded-lg overflow-hidden mb-4 border-2 border-gray-200 relative">
+                        {isFailed ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                            <AlertCircle className="w-16 h-16 mb-2" />
+                            <p className="text-sm font-semibold">Image unavailable</p>
+                          </div>
+                        ) : (
+                          <img
+                            src={imageUrl}
+                            alt={`Template ${templateId}`}
+                            className="w-full h-full object-contain"
+                            onError={() => handleImageError(templateId)}
+                          />
+                        )}
                       </div>
                       <Button
-                        className="w-full bg-gradient-to-r from-fun-pink to-fun-purple hover:from-fun-purple hover:to-fun-pink text-white font-bold text-lg shadow-lg group-hover:scale-105 transition-transform"
+                        disabled={isFailed}
+                        className={`w-full font-bold text-lg shadow-lg transition-transform ${
+                          isFailed
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-fun-pink to-fun-purple hover:from-fun-purple hover:to-fun-pink text-white group-hover:scale-105'
+                        }`}
                       >
                         <Palette className="mr-2 h-5 w-5" />
-                        {t.startColoring}
+                        {isFailed ? 'Unavailable' : t.startColoring}
                       </Button>
                     </CardContent>
                   </Card>
