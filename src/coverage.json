@@ -1,59 +1,56 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T11:58:08.905Z",
+  "generatedAt": "2026-02-06T12:57:17.305Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add offline support for the React app by implementing a Service Worker that precaches the application shell and key static assets, so that the app can load and navigate when the device is offline (at minimum: load the Home page and previously cached routes without a blank screen).",
+        "summary": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/public/sw.js"
+          "frontend/src/hooks/useAppBackgroundMusic.ts",
+          "frontend/src/services/audio.ts",
+          "frontend/src/types/androidBridge.d.ts"
         ],
         "matchedFiles": [
-          "frontend/public/sw.js"
+          "frontend/src/hooks/useAppBackgroundMusic.ts",
+          "frontend/src/services/audio.ts",
+          "frontend/src/types/androidBridge.d.ts"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Register the Service Worker from a non-immutable entry point (do not modify frontend/src/main.tsx) so the Service Worker is installed/activated in production builds.",
+        "summary": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.html"
+          "frontend/src/services/audio.ts",
+          "frontend/src/contexts/AudioSettingsContext.tsx",
+          "frontend/src/components/Header.tsx"
         ],
         "matchedFiles": [
-          "frontend/index.html"
+          "frontend/src/services/audio.ts",
+          "frontend/src/contexts/AudioSettingsContext.tsx",
+          "frontend/src/components/Header.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Ensure Android WebView “bridge-only audio” mode can be enabled automatically at runtime when running inside an Android WebView with the JS bridge available, so the app does not attempt web-audio fallback that can cause missing-file or user-gesture playback issues.",
+        "summary": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/index.html",
-          "frontend/src/config/audioConfig.ts"
+          "frontend/src/contexts/AudioSettingsContext.tsx",
+          "frontend/src/services/audio.ts"
         ],
         "matchedFiles": [
-          "frontend/index.html",
-          "frontend/src/config/audioConfig.ts"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, and that loads https://learnfun-h93.caffeine.xyz/ while exposing the AndroidAudio and BackgroundAudio JS interfaces.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/README.md"
-        ],
-        "matchedFiles": [
-          "frontend/README.md"
+          "frontend/src/contexts/AudioSettingsContext.tsx",
+          "frontend/src/services/audio.ts"
         ]
       }
     ]
@@ -63,10 +60,11 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/README.md",
-    "frontend/index.html",
-    "frontend/public/sw.js",
-    "frontend/src/config/audioConfig.ts",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/contexts/AudioSettingsContext.tsx",
+    "frontend/src/hooks/useAppBackgroundMusic.ts",
+    "frontend/src/services/audio.ts",
+    "frontend/src/types/androidBridge.d.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

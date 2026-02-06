@@ -5,21 +5,22 @@ import type { BackgroundSoundId } from '../lib/sounds';
 /**
  * Hook to manage persistent background audio playback across navigation.
  * 
- * Implements environment-aware gating:
- * - Android WebView with background audio bridge: starts immediately on mount
- * - Browser: waits for first user interaction to avoid autoplay blocks
+ * ENVIRONMENT-AWARE GATING:
+ * - Android WebView (window.BackgroundAudio.start exists): starts immediately on mount
+ * - Browser (no Android bridge): waits for first user interaction to avoid autoplay blocks
  * 
  * Prevents overlapping/restarting when the same track is already playing.
+ * Respects mute settings and stops playback when soundId becomes null.
  */
 export function useAppBackgroundMusic(soundId: BackgroundSoundId | null) {
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const hasStartedRef = useRef(false);
   const previousSoundIdRef = useRef<BackgroundSoundId | null>(null);
 
-  // Check if Android bridge with background audio support exists
+  // Check if Android background audio bridge exists (new bridge API)
   const hasAndroidBridge = typeof window !== 'undefined' && 
-    window.Android && 
-    typeof window.Android.startBackgroundAudio === 'function';
+    window.BackgroundAudio && 
+    typeof window.BackgroundAudio.start === 'function';
 
   // Listen for first user interaction (only needed for browser)
   useEffect(() => {
@@ -41,9 +42,17 @@ export function useAppBackgroundMusic(soundId: BackgroundSoundId | null) {
     };
   }, [hasAndroidBridge, hasUserInteracted]);
 
-  // Start/switch background audio
+  // Start/switch/stop background audio
   useEffect(() => {
-    if (!soundId) return;
+    // If soundId is null, stop any playing background music
+    if (!soundId) {
+      if (hasStartedRef.current) {
+        stopBackgroundAudio();
+        hasStartedRef.current = false;
+        previousSoundIdRef.current = null;
+      }
+      return;
+    }
 
     // Determine if we can start playback
     const canStart = hasAndroidBridge || hasUserInteracted;
@@ -56,8 +65,8 @@ export function useAppBackgroundMusic(soundId: BackgroundSoundId | null) {
     }
 
     try {
-      // Stop previous track if different
-      if (previousSoundIdRef.current && previousSoundIdRef.current !== soundId) {
+      // Stop previous track if different (only for web fallback)
+      if (previousSoundIdRef.current && previousSoundIdRef.current !== soundId && !hasAndroidBridge) {
         stopBackgroundAudio();
       }
 

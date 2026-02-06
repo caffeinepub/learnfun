@@ -1,71 +1,77 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Offline-capable app shell caching + Android WebView audio-only runtime config",
+  "title": "Fix audio mute toggles to fully silence background music and SFX",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Implement a Service Worker that precaches the app shell and applies runtime caching so the SPA can reload and navigate offline without a blank screen.",
+      "summary": "Make Background Music toggle Off immediately stop any currently playing background music (Android bridge mode and web fallback) and prevent resuming while muted.",
       "acceptanceCriteria": [
-        "A service worker file exists under the frontend’s static/public output (e.g., served from the site origin) and implements precache + runtime caching.",
-        "When the app is opened once online and then the device is set offline, reloading the app does not show a blank page (the app shell renders).",
-        "Caching strategy does not break normal online behavior (fresh loads still work and updates can be fetched)."
+        "When Background Music is toggled Off while a track is playing, the background music stops immediately (no lingering audio)",
+        "When Background Music is toggled Off and the user navigates between pages, background music does not resume until toggled On",
+        "In non-Android (web fallback) mode, the HTMLAudioElement background track is paused and reset to time 0 when toggled Off",
+        "In Android WebView bridge mode, the app attempts to stop background music via the bridge if a stop/pause method is available; if no stop method exists, the implementation must still prevent any further background playback attempts while muted"
       ],
       "file_operations": [
         {
-          "path": "frontend/public/sw.js",
-          "operation": "create",
-          "description": "Create a production Service Worker that (1) precaches the SPA app shell (at minimum: the root document) and key static assets, (2) implements navigation-request handling that serves the cached app shell when offline to avoid blank screens, (3) applies runtime caching for same-origin built assets (e.g., /assets/*) using a safe strategy (e.g., stale-while-revalidate) to preserve normal online behavior, and (4) manages cache versioning + cleanup on activate so updates can be fetched."
+          "path": "frontend/src/hooks/useAppBackgroundMusic.ts",
+          "operation": "modify",
+          "description": "Ensure that when the provided soundId becomes null (e.g., background music toggled Off), the hook explicitly stops background playback immediately and resets internal tracking refs so music does not resume across navigation while muted."
+        },
+        {
+          "path": "frontend/src/services/audio.ts",
+          "operation": "modify",
+          "description": "Update background stop behavior to fully stop/reset web fallback playback (pause + set currentTime=0) and, in Android WebView bridge mode, attempt to stop/pause via any available bridge method while still clearing internal currentBackgroundId to prevent further playback attempts when muted."
+        },
+        {
+          "path": "frontend/src/types/androidBridge.d.ts",
+          "operation": "modify",
+          "description": "Extend BackgroundAudioBridge typings to optionally include stop/pause-like methods (as optional function properties) so the web layer can safely attempt to stop background playback when available without assuming the method exists."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Register the Service Worker from a non-immutable entry point so it installs/activates in production without modifying frontend/src/main.tsx.",
+      "summary": "Make background-music mute state changes trigger stop behavior immediately by updating the audio service and where mute state is synchronized.",
       "acceptanceCriteria": [
-        "Service worker registration is added via an allowed file (e.g., frontend/index.html) without changing any immutable paths.",
-        "In production build, the browser devtools show the service worker is registered and controlling the page after reload."
+        "Toggling Background Music Off causes stop behavior even if no new track start is initiated afterwards",
+        "Toggling Background Music On allows playback again using the currently selected track (after user interaction gating on web, as currently designed)"
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/services/audio.ts",
           "operation": "modify",
-          "description": "Add Service Worker registration (only in supported browsers and production builds) via this HTML entry point (do not touch frontend/src/main.tsx), ensuring the registration runs early enough to install/activate and control the page after reload."
+          "description": "Change setBgMusicMuted(true) to immediately trigger the same stop behavior as an explicit stop call (including clearing currentBackgroundId and stopping any active web fallback audio), so muting does not rely on a subsequent start call."
+        },
+        {
+          "path": "frontend/src/contexts/AudioSettingsContext.tsx",
+          "operation": "modify",
+          "description": "Synchronize isBgMusicMuted changes to the audio service from within the provider (instead of relying on a specific UI component lifecycle), ensuring mute changes take effect immediately and reliably across the app."
+        },
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Remove or simplify local mute-to-audio-service synchronization effects if they become redundant after moving the synchronization to AudioSettingsProvider, keeping the Header focused on UI toggles only."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Auto-enable Android WebView bridge-only audio mode at runtime when the Android JS bridge is present, while keeping normal browser audio behavior unchanged.",
+      "summary": "Ensure SFX mute toggle fully mutes sound effects by reliably preventing new SFX playback while Off across the app.",
       "acceptanceCriteria": [
-        "When window.Android is present, window.__AUDIO_CONFIG__.androidOnly is set to true early enough that the audio service respects Android-only mode (no HTMLAudioElement web fallback attempts when bridge methods are missing).",
-        "On normal browsers (no window.Android), existing web-audio behavior remains unchanged."
+        "When SFX is toggled Off, calls to the SFX playback function result in no sound output",
+        "When SFX is toggled On again, SFX playback works normally"
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/contexts/AudioSettingsContext.tsx",
           "operation": "modify",
-          "description": "Inject an early inline script (before loading the React module) that detects Android WebView bridge availability (window.Android) and sets window.__AUDIO_CONFIG__.androidOnly = true so frontend/src/config/audioConfig.ts and frontend/src/services/audio.ts disable web-audio fallback only in that environment."
+          "description": "Synchronize isSfxMuted changes to the audio service from within the provider so the global SFX mute flag is always up-to-date before any SFX playback calls occur."
         },
         {
-          "path": "frontend/src/config/audioConfig.ts",
+          "path": "frontend/src/services/audio.ts",
           "operation": "modify",
-          "description": "Harden runtime config handling to safely read window.__AUDIO_CONFIG__.androidOnly and default to existing behavior when not set, ensuring the Android-only mode toggle remains backward-compatible for normal browsers."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Update frontend documentation with a final, copy/paste-ready Kotlin MainActivity snippet for offline-friendly WebView caching and reliable audio bridge playback loading the production URL.",
-      "acceptanceCriteria": [
-        "frontend/README.md includes an English Kotlin code block for MainActivity that (1) enables JavaScript + DOM storage, (2) sets mediaPlaybackRequiresUserGesture=false, (3) configures cache mode for offline-friendly behavior, (4) adds the AndroidAudio and BackgroundAudio JS interfaces, and (5) loads https://learnfun-h93.caffeine.xyz/.",
-        "The snippet is self-contained and consistent with the app’s documented audio bridge expectations (res/raw naming, bridge methods)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/README.md",
-          "operation": "modify",
-          "description": "Add/replace the Android Kotlin MainActivity documentation with a complete, copy/paste-ready English snippet that configures WebView settings for offline-friendly caching, sets mediaPlaybackRequiresUserGesture=false, exposes AndroidAudio and BackgroundAudio JS interfaces consistent with the app’s bridge expectations (res/raw naming + method names), and loads https://learnfun-h93.caffeine.xyz/. Also fix any broken/unfinished markdown code fences in the current Sound System section so the README renders correctly."
+          "description": "Confirm playSound respects the global SFX mute flag consistently across Android bridge mode and web fallback (early return when muted), and keep behavior stable when toggling back On."
         }
       ]
     }

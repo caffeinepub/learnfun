@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { BackgroundMusicProvider, useBackgroundMusic } from './contexts/BackgroundMusicContext';
+import { AudioSettingsProvider, useAudioSettings } from './contexts/AudioSettingsContext';
 import { useAppBackgroundMusic } from './hooks/useAppBackgroundMusic';
 import HomePage from './pages/HomePage';
 import GameZone from './pages/GameZone';
@@ -21,9 +22,11 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedAge, setSelectedAge] = useState<AgeGroup>(null);
   const { selectedTrack } = useBackgroundMusic();
+  const { isBgMusicMuted } = useAudioSettings();
 
   // Start persistent background music with environment-aware gating
-  useAppBackgroundMusic(selectedTrack);
+  // Pass null if muted to stop playback
+  useAppBackgroundMusic(isBgMusicMuted ? null : selectedTrack);
 
   const handleAgeSelect = (age: AgeGroup) => {
     setSelectedAge(age);
@@ -73,7 +76,9 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <LanguageProvider>
           <BackgroundMusicProvider>
-            <AppContent />
+            <AudioSettingsProvider>
+              <AppContent />
+            </AudioSettingsProvider>
           </BackgroundMusicProvider>
         </LanguageProvider>
       </ThemeProvider>

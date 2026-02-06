@@ -1,42 +1,34 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
-  "summary": "Android WebView-based LearnFun app should support offline operation and reliable audio playback (no audio issues).",
-  "architectural_notes": [
-    "App is an Android WebView wrapper that loads https://learnfun-h93.caffeine.xyz/ and exposes AndroidAudio/BackgroundAudio JS interfaces."
+  "projectStateVersion": 5,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [
+    "Audio toggle buttons do not fully mute sound when set to Off; expected complete silence when toggled off."
   ],
-  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-offline-support-for-the-react-app-by-implementing-a-service-worker-that-precaches-the-application-shell-and-key-static-assets-so-that-the-app-can-load-and-navigate-when-the-device-is-offline-at-minimum-load-the-home-page-and-previously-cached-routes-without-a-blank-screen",
-      "title": "Add offline support for the React app by implementing a Service Worker that precaches the application shell and key static assets, so that the app can load and navigate when the device is offline (at minimum: load the Home page and previously cached routes without a blank screen).",
+      "id": "feature-ensure-the-background-music-mute-toggle-fully-stops-any-currently-playing-background-music-when-switched-to-off-including-android-webview-bridge-mode-and-the-web-fallback",
+      "title": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-register-the-service-worker-from-a-non-immutable-entry-point-do-not-modify-frontend-src-main-tsx-so-the-service-worker-is-installed-activated-in-production-builds",
-      "title": "Register the Service Worker from a non-immutable entry point (do not modify frontend/src/main.tsx) so the Service Worker is installed/activated in production builds.",
+      "id": "feature-make-the-global-mute-state-changes-take-effect-immediately-and-reliably-by-updating-the-audio-service-so-that-setting-background-music-mute-to-true-triggers-the-stop-behavior-without-relying-on-a-subsequent-start-call",
+      "title": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-android-webview-bridge-only-audio-mode-can-be-enabled-automatically-at-runtime-when-running-inside-an-android-webview-with-the-js-bridge-available-so-the-app-does-not-attempt-web-audio-fallback-that-can-cause-missing-file-or-user-gesture-playback-issues",
-      "title": "Ensure Android WebView “bridge-only audio” mode can be enabled automatically at runtime when running inside an Android WebView with the JS bridge available, so the app does not attempt web-audio fallback that can cause missing-file or user-gesture playback issues.",
+      "id": "feature-ensure-the-sound-effects-sfx-mute-toggle-fully-mutes-sfx-by-preventing-any-new-sound-effects-from-playing-while-off-across-the-app",
+      "title": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
       "reqIds": [
         "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-documentation-to-include-a-final-copy-paste-ready-android-kotlin-mainactivity-example-that-configures-webview-for-offline-friendly-caching-and-reliable-audio-playback-and-that-loads-https-learnfun-h93-caffeine-xyz-while-exposing-the-androidaudio-and-backgroundaudio-js-interfaces",
-      "title": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, and that loads https://learnfun-h93.caffeine.xyz/ while exposing the AndroidAudio and BackgroundAudio JS interfaces.",
-      "reqIds": [
-        "REQ-4"
       ],
       "version": 1
     }
@@ -44,19 +36,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add offline support for the WebView app so it can run without internet connectivity.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Ensure audio playback works reliably in the WebView app (no audio-related issues).",
+      "summary": "Add two separate audio toggle buttons: one for background audio and one for other in-app sounds",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "com.learnfun.game",
+  "projectName": "Untitled request",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

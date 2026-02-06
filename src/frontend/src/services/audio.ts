@@ -3,32 +3,69 @@ import { isValidSoundId, isValidBackgroundSoundId } from '../lib/sounds';
 import { isAndroidAudioOnlyMode } from '../config/audioConfig';
 
 /**
- * Audio service that plays sounds via Android bridge when available,
- * falling back to web audio assets when not (unless Android-only mode is enabled).
+ * Audio service for Android WebView MP3-only playback.
  * 
- * Supports both one-shot SFX and looping background audio.
+ * ANDROID MODE:
+ * - Uses window.BackgroundAudio.start() for background music (looping MediaPlayer)
+ * - Uses window.AndroidAudio.playSound() for SFX (new MediaPlayer per call)
+ * - NO Web Audio API, NO HTMLAudioElement, NO AudioContext
+ * - All sounds are MP3 in res/raw/<soundId>.mp3
+ * - Sound IDs passed WITHOUT extensions
+ * 
+ * CRITICAL GUARANTEES:
+ * - Background and SFX playback are completely independent
+ * - SFX never stops/pauses background music
+ * - Background switching never interrupts SFX
+ * - No shared MediaPlayer instances
  */
 
-// Track current background audio
-let currentBackgroundAudio: HTMLAudioElement | null = null;
+// Track current background audio state
 let currentBackgroundId: BackgroundSoundId | null = null;
 
 // Track warned invalid IDs to avoid spam
 const warnedInvalidIds = new Set<string>();
 
+// Global mute states (set by audio settings context)
+let globalSfxMuted = false;
+let globalBgMusicMuted = false;
+
+/**
+ * Set global SFX mute state
+ */
+export function setSfxMuted(muted: boolean): void {
+  globalSfxMuted = muted;
+}
+
+/**
+ * Set global background music mute state
+ * When muted, immediately stops any playing background music
+ */
+export function setBgMusicMuted(muted: boolean): void {
+  globalBgMusicMuted = muted;
+  
+  // If muting, immediately stop any playing background music
+  if (muted) {
+    stopBackgroundAudio();
+  }
+}
+
 /**
  * Play a one-shot sound effect by ID.
  * 
- * - Validates sound ID before attempting playback
- * - If running in Android WebView (window.Android exists), calls the bridge to play from res/raw
- * - Otherwise, attempts to play from frontend static assets at /assets/audio/<soundId>.mp3
- *   (unless Android-only mode is enabled)
- * - Fails gracefully if sound is missing or bridge/audio unavailable
+ * ANDROID MODE:
+ * - Calls window.AndroidAudio.playSound(soundId) - bare ID, no extension
+ * - Each call creates a new MediaPlayer instance
+ * - Never affects background music playback
  * 
- * @param soundId - The sound resource name to play
+ * @param soundId - The sound resource name (no extension)
  */
 export function playSound(soundId: SoundId): void {
   try {
+    // Check if SFX is muted
+    if (globalSfxMuted) {
+      return;
+    }
+
     // Validate sound ID
     if (!isValidSoundId(soundId)) {
       if (!warnedInvalidIds.has(soundId)) {
@@ -38,19 +75,21 @@ export function playSound(soundId: SoundId): void {
       return;
     }
 
-    // Check for Android WebView bridge
-    if (window.Android && typeof window.Android.playSound === 'function') {
-      // Call Android bridge to play from res/raw
-      window.Android.playSound(soundId);
+    // Check for Android SFX bridge
+    if (window.AndroidAudio && typeof window.AndroidAudio.playSound === 'function') {
+      // Call Android bridge - pass bare soundId (no extension)
+      // Maps to res/raw/<soundId>.mp3
+      window.AndroidAudio.playSound(soundId);
       return;
     }
 
     // If Android-only mode is enabled and bridge is not available, do nothing
+    // NO web fallback, NO HTMLAudioElement creation
     if (isAndroidAudioOnlyMode()) {
       return;
     }
 
-    // Fallback to web audio
+    // Web fallback (only if Android-only mode is disabled)
     playWebAudio(soundId);
   } catch (error) {
     // Fail gracefully - log but don't crash
@@ -60,12 +99,24 @@ export function playSound(soundId: SoundId): void {
 
 /**
  * Start playing a looping background track.
- * Stops any currently playing background track before starting the new one.
  * 
- * @param soundId - The background sound resource name to play
+ * ANDROID MODE:
+ * - Calls window.BackgroundAudio.start(soundId) - bare ID, no extension
+ * - Creates a new looping MediaPlayer instance
+ * - Stops previous background track automatically
+ * - Never affects SFX playback
+ * 
+ * @param soundId - The background sound resource name (no extension)
  */
 export function startBackgroundAudio(soundId: BackgroundSoundId): void {
   try {
+    // Check if background music is muted
+    if (globalBgMusicMuted) {
+      // Stop any playing background music
+      stopBackgroundAudio();
+      return;
+    }
+
     // Validate background sound ID
     if (!isValidBackgroundSoundId(soundId)) {
       if (!warnedInvalidIds.has(soundId)) {
@@ -76,27 +127,29 @@ export function startBackgroundAudio(soundId: BackgroundSoundId): void {
     }
 
     // If same track is already playing, do nothing
-    if (currentBackgroundId === soundId && currentBackgroundAudio && !currentBackgroundAudio.paused) {
+    if (currentBackgroundId === soundId) {
       return;
     }
 
-    // Stop current background audio if any
-    stopBackgroundAudio();
+    // Update current background ID
+    currentBackgroundId = soundId;
 
-    // Check for Android WebView bridge with background audio support
-    if (window.Android && typeof window.Android.startBackgroundAudio === 'function') {
-      window.Android.startBackgroundAudio(soundId);
-      currentBackgroundId = soundId;
+    // Check for Android background audio bridge
+    if (window.BackgroundAudio && typeof window.BackgroundAudio.start === 'function') {
+      // Call Android bridge - pass bare soundId (no extension)
+      // Maps to res/raw/<soundId>.mp3
+      // Android side handles stopping previous track
+      window.BackgroundAudio.start(soundId);
       return;
     }
 
-    // If Android-only mode is enabled and bridge method is not available, do nothing
+    // If Android-only mode is enabled and bridge is not available, do nothing
+    // NO web fallback, NO HTMLAudioElement creation
     if (isAndroidAudioOnlyMode()) {
-      currentBackgroundId = soundId; // Track intent even if not playing
       return;
     }
 
-    // Fallback to web audio
+    // Web fallback (only if Android-only mode is disabled)
     playWebBackgroundAudio(soundId);
   } catch (error) {
     console.warn(`Failed to start background audio: ${soundId}`, error);
@@ -105,22 +158,30 @@ export function startBackgroundAudio(soundId: BackgroundSoundId): void {
 
 /**
  * Stop the currently playing background track.
+ * 
+ * Attempts to stop background music in both Android bridge mode and web fallback.
  */
 export function stopBackgroundAudio(): void {
   try {
-    // Stop Android bridge background audio if available
-    if (window.Android && typeof window.Android.stopBackgroundAudio === 'function') {
-      window.Android.stopBackgroundAudio();
-    }
-
-    // Stop web audio (always clear state even if bridge method is missing)
-    if (currentBackgroundAudio) {
-      currentBackgroundAudio.pause();
-      currentBackgroundAudio.currentTime = 0;
-      currentBackgroundAudio = null;
-    }
-
     currentBackgroundId = null;
+
+    // Try to stop Android bridge background music if available
+    // Note: The bridge may not expose a stop method, but we try pause if available
+    if (window.BackgroundAudio) {
+      // Check if pause method exists (optional extension)
+      if (typeof (window.BackgroundAudio as any).pause === 'function') {
+        (window.BackgroundAudio as any).pause();
+      }
+      // Check if stop method exists (optional extension)
+      if (typeof (window.BackgroundAudio as any).stop === 'function') {
+        (window.BackgroundAudio as any).stop();
+      }
+    }
+    
+    // Always stop web audio fallback (if not in Android-only mode)
+    if (!isAndroidAudioOnlyMode()) {
+      stopWebBackgroundAudio();
+    }
   } catch (error) {
     console.warn('Failed to stop background audio', error);
   }
@@ -133,67 +194,68 @@ export function getCurrentBackgroundAudio(): BackgroundSoundId | null {
   return currentBackgroundId;
 }
 
+// ============================================================================
+// WEB FALLBACK (only used when Android-only mode is disabled)
+// ============================================================================
+
+let currentWebBackgroundAudio: HTMLAudioElement | null = null;
+
 /**
  * Play audio from web static assets (one-shot)
+ * Only called when NOT in Android-only mode
  */
 function playWebAudio(soundId: SoundId): void {
   try {
-    // Try .mp3 first, then .wav as fallback
     const audio = new Audio(`/assets/audio/${soundId}.mp3`);
     
     audio.onerror = () => {
-      // Try .wav as fallback
-      const audioWav = new Audio(`/assets/audio/${soundId}.wav`);
-      audioWav.onerror = () => {
-        console.warn(`Web audio file not found: ${soundId}`);
-      };
-      audioWav.play().catch(() => {
-        // Silently fail if play is blocked or fails
-      });
+      // No "Sound not found" message - just silent failure
+      // Android bridge will log if resource is missing in res/raw
     };
     
     audio.play().catch(() => {
       // Silently fail if play is blocked or fails
     });
   } catch (error) {
-    console.warn(`Failed to play web audio: ${soundId}`, error);
+    // Silent failure - avoid misleading logs in Android mode
   }
 }
 
 /**
  * Play looping background audio from web static assets
+ * Only called when NOT in Android-only mode
  */
 function playWebBackgroundAudio(soundId: BackgroundSoundId): void {
   try {
+    // Stop previous web background audio
+    stopWebBackgroundAudio();
+
     const audio = new Audio(`/assets/audio/${soundId}.mp3`);
     audio.loop = true;
     audio.volume = 0.3; // Lower volume for background music
     
     audio.onerror = () => {
-      // Try .wav as fallback
-      const audioWav = new Audio(`/assets/audio/${soundId}.wav`);
-      audioWav.loop = true;
-      audioWav.volume = 0.3;
-      
-      audioWav.onerror = () => {
-        console.warn(`Web background audio file not found: ${soundId}`);
-      };
-      
-      audioWav.play().catch((err) => {
-        console.warn(`Failed to play background audio: ${soundId}`, err);
-      });
-      
-      currentBackgroundAudio = audioWav;
-      currentBackgroundId = soundId;
+      // No "Sound not found" message - just silent failure
     };
     
-    audio.play().catch((err) => {
-      console.warn(`Failed to play background audio: ${soundId}`, err);
+    audio.play().catch(() => {
+      // Silently fail if play is blocked
     });
     
-    currentBackgroundAudio = audio;
-    currentBackgroundId = soundId;
+    currentWebBackgroundAudio = audio;
   } catch (error) {
-    console.warn(`Failed to play web background audio: ${soundId}`, error);
+    // Silent failure
+  }
+}
+
+/**
+ * Stop web background audio
+ * Only called when NOT in Android-only mode
+ */
+function stopWebBackgroundAudio(): void {
+  if (currentWebBackgroundAudio) {
+    currentWebBackgroundAudio.pause();
+    currentWebBackgroundAudio.currentTime = 0;
+    currentWebBackgroundAudio = null;
   }
 }

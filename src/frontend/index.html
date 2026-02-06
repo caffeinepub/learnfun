@@ -7,9 +7,16 @@
         <!-- Early Android WebView audio configuration -->
         <script>
           // Detect Android WebView bridge and configure audio mode
+          // Based on NEW bridge API: window.BackgroundAudio and window.AndroidAudio
           (function() {
-            if (typeof window.Android !== 'undefined') {
-              // Android WebView detected - enable bridge-only audio mode
+            // Check for new Android audio bridge objects
+            var hasBackgroundAudio = typeof window.BackgroundAudio !== 'undefined' && 
+                                     typeof window.BackgroundAudio.start === 'function';
+            var hasAndroidAudio = typeof window.AndroidAudio !== 'undefined' && 
+                                  typeof window.AndroidAudio.playSound === 'function';
+            
+            if (hasBackgroundAudio || hasAndroidAudio) {
+              // Android WebView with new bridge detected - enable bridge-only audio mode
               window.__AUDIO_CONFIG__ = window.__AUDIO_CONFIG__ || {};
               window.__AUDIO_CONFIG__.androidOnly = true;
             }

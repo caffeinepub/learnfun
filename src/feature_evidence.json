@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-offline-support-for-the-react-app-by-implementing-a-service-worker-that-precaches-the-application-shell-and-key-static-assets-so-that-the-app-can-load-and-navigate-when-the-device-is-offline-at-minimum-load-the-home-page-and-previously-cached-routes-without-a-blank-screen",
-      "featureTitle": "Add offline support for the React app by implementing a Service Worker that precaches the application shell and key static assets, so that the app can load and navigate when the device is offline (at minimum: load the Home page and previously cached routes without a blank screen).",
+      "featureId": "feature-ensure-the-background-music-mute-toggle-fully-stops-any-currently-playing-background-music-when-switched-to-off-including-android-webview-bridge-mode-and-the-web-fallback",
+      "featureTitle": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
       "files": [
-        "frontend/public/sw.js"
+        "frontend/src/hooks/useAppBackgroundMusic.ts",
+        "frontend/src/services/audio.ts",
+        "frontend/src/types/androidBridge.d.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -21,10 +23,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-register-the-service-worker-from-a-non-immutable-entry-point-do-not-modify-frontend-src-main-tsx-so-the-service-worker-is-installed-activated-in-production-builds",
-      "featureTitle": "Register the Service Worker from a non-immutable entry point (do not modify frontend/src/main.tsx) so the Service Worker is installed/activated in production builds.",
+      "featureId": "feature-make-the-global-mute-state-changes-take-effect-immediately-and-reliably-by-updating-the-audio-service-so-that-setting-background-music-mute-to-true-triggers-the-stop-behavior-without-relying-on-a-subsequent-start-call",
+      "featureTitle": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
       "files": [
-        "frontend/index.html"
+        "frontend/src/components/Header.tsx",
+        "frontend/src/contexts/AudioSettingsContext.tsx",
+        "frontend/src/services/audio.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -40,11 +44,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-android-webview-bridge-only-audio-mode-can-be-enabled-automatically-at-runtime-when-running-inside-an-android-webview-with-the-js-bridge-available-so-the-app-does-not-attempt-web-audio-fallback-that-can-cause-missing-file-or-user-gesture-playback-issues",
-      "featureTitle": "Ensure Android WebView “bridge-only audio” mode can be enabled automatically at runtime when running inside an Android WebView with the JS bridge available, so the app does not attempt web-audio fallback that can cause missing-file or user-gesture playback issues.",
+      "featureId": "feature-ensure-the-sound-effects-sfx-mute-toggle-fully-mutes-sfx-by-preventing-any-new-sound-effects-from-playing-while-off-across-the-app",
+      "featureTitle": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
       "files": [
-        "frontend/index.html",
-        "frontend/src/config/audioConfig.ts"
+        "frontend/src/contexts/AudioSettingsContext.tsx",
+        "frontend/src/services/audio.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -56,25 +60,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-documentation-to-include-a-final-copy-paste-ready-android-kotlin-mainactivity-example-that-configures-webview-for-offline-friendly-caching-and-reliable-audio-playback-and-that-loads-https-learnfun-h93-caffeine-xyz-while-exposing-the-androidaudio-and-backgroundaudio-js-interfaces",
-      "featureTitle": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, and that loads https://learnfun-h93.caffeine.xyz/ while exposing the AndroidAudio and BackgroundAudio JS interfaces.",
-      "files": [
-        "frontend/README.md"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "blob-storage@4.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

@@ -25,44 +25,11 @@ After visiting the app once while online, users can reload and navigate the app 
 
 ## Sound System
 
-The application includes a comprehensive sound system that works both on web and Android WebView, with support for one-shot sound effects and looping background audio.
+The application uses a dual-bridge Android audio architecture for optimal performance and independence between background music and sound effects.
 
-### For APK Packagers
+### Android WebView Bridge API
 
-When building the Android APK, include the following sound files in the `res/raw/` folder:
+The app requires two separate JavaScript bridge objects for audio playback:
 
-#### One-Shot Sound Effects
-- `tap_click` - Button/tap interaction sound
-- `card_flip` - Memory card flip sound
-- `match_success` - Successful match sound
-- `match_fail` - Failed match sound
-- `quiz_correct` - Correct quiz answer sound
-- `quiz_wrong` - Wrong quiz answer sound
-- `level_complete` - Level completion sound
-- `celebration` - Celebration modal sound
-
-#### Looping Background/Ambient Tracks
-- `bg_playful_melody` - Cheerful, playful background music (default track)
-- `bg_happy_adventure` - Upbeat adventure theme
-- `bg_gentle_wonder` - Soft, wonder-filled ambient track
-- `bg_cheerful_exploration` - Bright exploration music
-- `bg_magical_journey` - Magical, enchanting background
-- `bg_sunny_playground` - Light, sunny playground atmosphere
-- `bg_dreamy_clouds` - Calm, dreamy ambient sound
-- `bg_curious_discovery` - Curious, discovery-themed music
-
-**Important:** 
-- File names must be lowercase with only letters, numbers, and underscores
-- Do not include file extensions in the resource names
-- Supported formats: `.mp3`, `.wav`, `.ogg`
-- Background tracks should be designed to loop seamlessly
-- Recommended: Keep background music volume lower than SFX for better UX
-
-### Android WebView Bridge-Only Mode
-
-For APK builds that should only use Android native audio (no web fallback), the app automatically detects the Android WebView bridge and enables bridge-only mode. This prevents web audio fallback when the Android bridge or required methods are not available.
-
-**Manual Override (Optional):**
-
-You can also enable Android-only mode via environment variable at build time:
+#### 1. Background Music Bridge: `window.BackgroundAudio`
 

@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
-import { Home } from 'lucide-react';
+import { Home, Music, Volume2, VolumeX } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import BackgroundMusicSelectorModal from './BackgroundMusicSelectorModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../lib/translations';
+import { useAudioSettings } from '../contexts/AudioSettingsContext';
 
 interface HeaderProps {
   onBackToHome: () => void;
@@ -12,6 +13,7 @@ interface HeaderProps {
 export default function Header({ onBackToHome }: HeaderProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
+  const { isBgMusicMuted, isSfxMuted, toggleBgMusic, toggleSfx } = useAudioSettings();
 
   return (
     <header className="bg-white/10 backdrop-blur-md border-b-4 border-white/20 shadow-lg">
@@ -29,6 +31,34 @@ export default function Header({ onBackToHome }: HeaderProps) {
           </div>
           
           <div className="flex items-center gap-2 md:gap-3">
+            <Button
+              onClick={toggleBgMusic}
+              size="lg"
+              variant="ghost"
+              className="bg-white/90 hover:bg-white text-fun-purple font-bold shadow-lg"
+              title={isBgMusicMuted ? t.bgMusicOff : t.bgMusicOn}
+            >
+              {isBgMusicMuted ? (
+                <VolumeX className="w-5 h-5 md:w-6 md:h-6" />
+              ) : (
+                <Music className="w-5 h-5 md:w-6 md:h-6" />
+              )}
+            </Button>
+            
+            <Button
+              onClick={toggleSfx}
+              size="lg"
+              variant="ghost"
+              className="bg-white/90 hover:bg-white text-fun-purple font-bold shadow-lg"
+              title={isSfxMuted ? t.sfxOff : t.sfxOn}
+            >
+              {isSfxMuted ? (
+                <VolumeX className="w-5 h-5 md:w-6 md:h-6" />
+              ) : (
+                <Volume2 className="w-5 h-5 md:w-6 md:h-6" />
+              )}
+            </Button>
+
             <BackgroundMusicSelectorModal />
             <LanguageSelector />
             <Button

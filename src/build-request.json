@@ -1,87 +1,71 @@
 {
   "kind": "build_request",
-  "title": "Add offline-capable app shell caching and harden Android WebView audio-only configuration",
+  "title": "Fix audio mute toggles so Off fully silences the app",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add offline support for the React app by implementing a Service Worker that precaches the application shell and key static assets, so that the app can load and navigate when the device is offline (at minimum: load the Home page and previously cached routes without a blank screen).",
+      "text": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-20"
         ],
         "quotes": [
-          "bu kodu çevrimdışı çalışma ... şekilde son final halini bana metin olarak gönder"
+          "Ses açma kapama tuşları birşeye yaramıyor. Kapalı konuma getirince sesin tamamen kapanması lazım"
         ]
       },
       "acceptanceCriteria": [
-        "A service worker file exists under the frontend’s static/public output (e.g., served from the site origin) and implements precache + runtime caching.",
-        "When the app is opened once online and then the device is set offline, reloading the app does not show a blank page (the app shell renders).",
-        "Caching strategy does not break normal online behavior (fresh loads still work and updates can be fetched)."
+        "When Background Music is toggled Off while a track is playing, the background music stops immediately (no lingering audio)",
+        "When Background Music is toggled Off and the user navigates between pages, background music does not resume until toggled On",
+        "In non-Android (web fallback) mode, the HTMLAudioElement background track is paused and reset to time 0 when toggled Off",
+        "In Android WebView bridge mode, the app attempts to stop background music via the bridge if a stop/pause method is available; if no stop method exists, the implementation must still prevent any further background playback attempts while muted"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Register the Service Worker from a non-immutable entry point (do not modify frontend/src/main.tsx) so the Service Worker is installed/activated in production builds.",
+      "text": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-20"
         ],
         "quotes": [
-          "çevrimdışı çalışma ..."
+          "Kapalı konuma getirince sesin tamamen kapanması lazım"
         ]
       },
       "acceptanceCriteria": [
-        "Service worker registration is added via an allowed file (e.g., frontend/index.html) without changing any immutable paths.",
-        "In production build, the browser devtools show the service worker is registered and controlling the page after reload."
+        "Toggling Background Music Off causes stop behavior even if no new track start is initiated afterwards",
+        "Toggling Background Music On allows playback again using the currently selected track (after user interaction gating on web, as currently designed)"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Ensure Android WebView “bridge-only audio” mode can be enabled automatically at runtime when running inside an Android WebView with the JS bridge available, so the app does not attempt web-audio fallback that can cause missing-file or user-gesture playback issues.",
+      "text": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-20"
         ],
         "quotes": [
-          "ses sorunu yaşanmayacak şekilde"
+          "Ses açma kapama tuşları birşeye yaramıyor."
         ]
       },
       "acceptanceCriteria": [
-        "When window.Android is present, window.__AUDIO_CONFIG__.androidOnly is set to true early enough that the audio service respects Android-only mode (no HTMLAudioElement web fallback attempts when bridge methods are missing).",
-        "On normal browsers (no window.Android), existing web-audio behavior remains unchanged."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, and that loads https://learnfun-h93.caffeine.xyz/ while exposing the AndroidAudio and BackgroundAudio JS interfaces.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "... son final halini bana metin olarak gönder"
-        ]
-      },
-      "acceptanceCriteria": [
-        "frontend/README.md includes an English Kotlin code block for MainActivity that (1) enables JavaScript + DOM storage, (2) sets mediaPlaybackRequiresUserGesture=false, (3) configures cache mode for offline-friendly behavior, (4) adds the AndroidAudio and BackgroundAudio JS interfaces, and (5) loads https://learnfun-h93.caffeine.xyz/.",
-        "The snippet is self-contained and consistent with the app’s documented audio bridge expectations (res/raw naming, bridge methods)."
+        "When SFX is toggled Off, calls to the SFX playback function result in no sound output",
+        "When SFX is toggled On again, SFX playback works normally"
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/main.tsx or any other paths listed in SYSTEM_CONTEXT.frontend.immutablePaths.",
-    "Backend must remain single-actor; do not introduce additional backend canisters/services.",
-    "Do not add third-party auth or external databases/services."
+    "Do not modify any files under frontend/src/components/ui (Shadcn components are read-only).",
+    "Do not edit immutable paths listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
+    "Keep the backend architecture unchanged (single Motoko actor); no backend changes are required for this fix."
   ],
   "nonGoals": [
-    "Implementing the native Android Studio project (Gradle/Manifest/XML) directly in this codebase.",
-    "Adding new gameplay features or changing existing game logic.",
-    "Adding real-time communication features (WebSockets/chat)."
+    "Adding a new master mute toggle (unless explicitly requested later).",
+    "Changing the Android wrapper app / native bridge implementation (only handle what is possible from the web layer).",
+    "Adding new audio tracks or changing the existing music selection UI."
   ],
   "imageRequirements": {
     "required": [],
