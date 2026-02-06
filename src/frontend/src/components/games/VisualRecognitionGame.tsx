@@ -116,6 +116,10 @@ export default function VisualRecognitionGame({ ageGroup, onBack, onComplete }: 
     }
   };
 
+  const getInstructionText = () => {
+    return t.findDifferences;
+  };
+
   const isNatureCategory = ['nature', 'forest', 'ocean', 'mountain'].includes(sceneType);
   const isSchoolCategory = ['school', 'classroom', 'playground'].includes(sceneType);
   const isCityCategory = sceneType === 'city';
@@ -144,7 +148,7 @@ export default function VisualRecognitionGame({ ageGroup, onBack, onComplete }: 
               {t.visualRecognition}
             </h2>
             <p className="text-lg md:text-xl text-gray-700 font-semibold">
-              {t.findDifferences}
+              {getInstructionText()}
             </p>
           </div>
 
@@ -316,7 +320,7 @@ export default function VisualRecognitionGame({ ageGroup, onBack, onComplete }: 
           >
             <img 
               src={getSceneImage()}
-              alt="Find Differences"
+              alt={t.visualRecognition}
               className="w-full h-full object-cover"
             />
             {differences.map((diff, index) => (
@@ -336,7 +340,7 @@ export default function VisualRecognitionGame({ ageGroup, onBack, onComplete }: 
 
           <div className="mt-6 text-center">
             <p className="text-lg text-gray-600 font-semibold">
-              👆 {ageGroup === '3-5' || ageGroup === '6-8' ? 'Resme tıkla ve farklılıkları bul!' : 'Resme tıklayarak tüm farklılıkları bul!'}
+              👆 {getInstructionText()}
             </p>
           </div>
         </CardContent>

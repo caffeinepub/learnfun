@@ -1,71 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Fix audio mute toggles so Off fully silences the app",
+  "title": "Fix language switching so all app content updates across pages and games",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
+      "text": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-20"
+          "msg-1"
         ],
         "quotes": [
-          "Ses açma kapama tuşları birşeye yaramıyor. Kapalı konuma getirince sesin tamamen kapanması lazım"
+          "dil seçeneğini değişince sadece üst kısımdaki var değişiyor diğer içerikler hep aynı kalıyor",
+          "yüzde yüz bir değişme olsun",
+          "build"
         ]
       },
       "acceptanceCriteria": [
-        "When Background Music is toggled Off while a track is playing, the background music stops immediately (no lingering audio)",
-        "When Background Music is toggled Off and the user navigates between pages, background music does not resume until toggled On",
-        "In non-Android (web fallback) mode, the HTMLAudioElement background track is paused and reset to time 0 when toggled Off",
-        "In Android WebView bridge mode, the app attempts to stop background music via the bridge if a stop/pause method is available; if no stop method exists, the implementation must still prevent any further background playback attempts while muted"
+        "When the user changes language via the language selector, all visible text on the currently open page updates immediately (same render cycle) to the selected language.",
+        "This includes at minimum: HomePage, GameZone, QuizZone, ColoringZone, Header, Footer, and any open modals/dialogs (e.g., CelebrationModal).",
+        "No full page reload is needed; the UI updates purely via React state/context changes."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
+      "text": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-20"
+          "msg-1"
         ],
         "quotes": [
-          "Kapalı konuma getirince sesin tamamen kapanması lazım"
+          "sadece üst baardaki kısımlar değişiyor",
+          "yüzde yüz bir değişme olsun"
         ]
       },
       "acceptanceCriteria": [
-        "Toggling Background Music Off causes stop behavior even if no new track start is initiated afterwards",
-        "Toggling Background Music On allows playback again using the currently selected track (after user interaction gating on web, as currently designed)"
+        "All previously hardcoded UI strings in pages/components are replaced with translated strings (via the existing translation approach used in other components).",
+        "ProblemSolvingGame must not generate Turkish-only scenario/option text; generated/fallback scenarios/options must be language-aware so switching between Turkish and English changes the displayed scenarios/options accordingly.",
+        "Any accessibility/screen-reader-only user-facing strings (e.g., dialog descriptions) are also localized or derived from existing translations so they reflect the selected language."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
+      "text": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-20"
+          "msg-1"
         ],
         "quotes": [
-          "Ses açma kapama tuşları birşeye yaramıyor."
+          "dil seçeneğini değişince ... diğer içerikler hep aynı kalıyor"
         ]
       },
       "acceptanceCriteria": [
-        "When SFX is toggled Off, calls to the SFX playback function result in no sound output",
-        "When SFX is toggled On again, SFX playback works normally"
+        "Backend-sourced localized content (e.g., games list text, quiz questions, encouragement messages) updates when language changes.",
+        "React Query query keys for language-dependent queries include the current backend language value, and any derived local state from those queries is refreshed on language change (no stale language text remains)."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any files under frontend/src/components/ui (Shadcn components are read-only).",
-    "Do not edit immutable paths listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
-    "Keep the backend architecture unchanged (single Motoko actor); no backend changes are required for this fix."
+    "Use English for any user-facing text in this build request.",
+    "Do not edit files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding a new master mute toggle (unless explicitly requested later).",
-    "Changing the Android wrapper app / native bridge implementation (only handle what is possible from the web layer).",
-    "Adding new audio tracks or changing the existing music selection UI."
+    "Adding new languages beyond the existing supported set.",
+    "Redesigning UI layout or adding new features unrelated to language switching."
   ],
   "imageRequirements": {
     "required": [],

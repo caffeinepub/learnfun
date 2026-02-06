@@ -35,15 +35,15 @@ function mapAgeGroupToBackendEnum(ageGroup: AgeGroup): BackendAgeGroup | null {
 
 export function useGames(ageGroup: AgeGroup) {
   const { actor, isFetching } = useActor();
-  const { getBackendLanguage } = useLanguage();
+  const { backendLanguage } = useLanguage();
   const backendAgeGroup = mapAgeGroupToBackend(ageGroup);
 
   return useQuery<SimpleGame[]>({
-    queryKey: ['games', backendAgeGroup, getBackendLanguage()],
+    queryKey: ['games', backendAgeGroup, backendLanguage],
     queryFn: async () => {
       if (!actor || !backendAgeGroup) return [];
       try {
-        const games = await actor.getGames(backendAgeGroup, getBackendLanguage());
+        const games = await actor.getGames(backendAgeGroup, backendLanguage);
         return games || [];
       } catch (error) {
         console.error('Error fetching games:', error);
@@ -58,15 +58,15 @@ export function useGames(ageGroup: AgeGroup) {
 
 export function useQuizQuestions(ageGroup: AgeGroup) {
   const { actor, isFetching } = useActor();
-  const { getBackendLanguage } = useLanguage();
+  const { backendLanguage } = useLanguage();
   const backendAgeGroup = mapAgeGroupToBackend(ageGroup);
 
   return useQuery<SimpleQuestion[]>({
-    queryKey: ['quiz-questions', backendAgeGroup, getBackendLanguage()],
+    queryKey: ['quiz-questions', backendAgeGroup, backendLanguage],
     queryFn: async () => {
       if (!actor || !backendAgeGroup) return [];
       try {
-        const questions = await actor.getQuizQuestions(backendAgeGroup, getBackendLanguage());
+        const questions = await actor.getQuizQuestions(backendAgeGroup, backendLanguage);
         return questions || [];
       } catch (error) {
         console.error('Error fetching quiz questions:', error);
@@ -81,14 +81,14 @@ export function useQuizQuestions(ageGroup: AgeGroup) {
 
 export function useEncouragementMessage(level: number) {
   const { actor, isFetching } = useActor();
-  const { getBackendLanguage } = useLanguage();
+  const { backendLanguage } = useLanguage();
 
   return useQuery<string>({
-    queryKey: ['encouragement', level, getBackendLanguage()],
+    queryKey: ['encouragement', level, backendLanguage],
     queryFn: async () => {
       if (!actor) return '';
       try {
-        return await actor.getEncouragementMessage(BigInt(level), getBackendLanguage());
+        return await actor.getEncouragementMessage(BigInt(level), backendLanguage);
       } catch (error) {
         console.error('Error fetching encouragement message:', error);
         return '';
@@ -124,10 +124,11 @@ export function useMemoryGames(ageGroup: AgeGroup) {
 
 export function useLogicPuzzles(ageGroup: AgeGroup) {
   const { actor, isFetching } = useActor();
+  const { backendLanguage } = useLanguage();
   const backendAgeGroup = mapAgeGroupToBackend(ageGroup);
 
   return useQuery<LogicPuzzle[]>({
-    queryKey: ['logic-puzzles', backendAgeGroup],
+    queryKey: ['logic-puzzles', backendAgeGroup, backendLanguage],
     queryFn: async () => {
       if (!actor || !backendAgeGroup) return [];
       try {
@@ -168,10 +169,11 @@ export function useVisualRecognitionTasks(ageGroup: AgeGroup) {
 
 export function useProblemSolvingTasks(ageGroup: AgeGroup) {
   const { actor, isFetching } = useActor();
+  const { backendLanguage } = useLanguage();
   const backendAgeGroup = mapAgeGroupToBackend(ageGroup);
 
   return useQuery<ProblemSolving[]>({
-    queryKey: ['problem-solving', backendAgeGroup],
+    queryKey: ['problem-solving', backendAgeGroup, backendLanguage],
     queryFn: async () => {
       if (!actor || !backendAgeGroup) return [];
       try {

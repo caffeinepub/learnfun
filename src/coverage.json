@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T12:57:17.305Z",
+  "generatedAt": "2026-02-06T13:57:06.572Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,45 +12,62 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
+        "summary": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useAppBackgroundMusic.ts",
-          "frontend/src/services/audio.ts",
-          "frontend/src/types/androidBridge.d.ts"
+          "frontend/src/contexts/LanguageContext.tsx",
+          "frontend/src/components/CelebrationModal.tsx",
+          "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "frontend/src/components/games/VisualRecognitionGame.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useAppBackgroundMusic.ts",
-          "frontend/src/services/audio.ts",
-          "frontend/src/types/androidBridge.d.ts"
+          "frontend/src/contexts/LanguageContext.tsx",
+          "frontend/src/components/CelebrationModal.tsx",
+          "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "frontend/src/components/games/VisualRecognitionGame.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
+        "summary": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/services/audio.ts",
-          "frontend/src/contexts/AudioSettingsContext.tsx",
-          "frontend/src/components/Header.tsx"
+          "frontend/src/lib/translations.ts",
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/pages/ColoringZone.tsx",
+          "frontend/src/components/games/MathPuzzleGame.tsx",
+          "frontend/src/components/games/VisualRecognitionGame.tsx",
+          "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "frontend/src/lib/problemSolvingFallback.ts",
+          "frontend/src/lib/logicPuzzleFallback.ts",
+          "frontend/src/lib/localizedText.ts"
         ],
         "matchedFiles": [
-          "frontend/src/services/audio.ts",
-          "frontend/src/contexts/AudioSettingsContext.tsx",
-          "frontend/src/components/Header.tsx"
+          "frontend/src/pages/HomePage.tsx",
+          "frontend/src/components/games/VisualRecognitionGame.tsx",
+          "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "frontend/src/lib/problemSolvingFallback.ts",
+          "frontend/src/lib/logicPuzzleFallback.ts",
+          "frontend/src/lib/localizedText.ts"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
+        "summary": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/contexts/AudioSettingsContext.tsx",
-          "frontend/src/services/audio.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/hooks/useRandomizedQuizQuestions.ts",
+          "frontend/src/pages/GameZone.tsx",
+          "frontend/src/pages/QuizZone.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/contexts/AudioSettingsContext.tsx",
-          "frontend/src/services/audio.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/hooks/useRandomizedQuizQuestions.ts"
         ]
       }
     ]
@@ -60,11 +77,17 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/contexts/AudioSettingsContext.tsx",
-    "frontend/src/hooks/useAppBackgroundMusic.ts",
-    "frontend/src/services/audio.ts",
-    "frontend/src/types/androidBridge.d.ts",
+    "frontend/src/components/CelebrationModal.tsx",
+    "frontend/src/components/games/LogicPuzzleGame.tsx",
+    "frontend/src/components/games/ProblemSolvingGame.tsx",
+    "frontend/src/components/games/VisualRecognitionGame.tsx",
+    "frontend/src/contexts/LanguageContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useRandomizedQuizQuestions.ts",
+    "frontend/src/lib/localizedText.ts",
+    "frontend/src/lib/logicPuzzleFallback.ts",
+    "frontend/src/lib/problemSolvingFallback.ts",
+    "frontend/src/pages/HomePage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

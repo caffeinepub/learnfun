@@ -1,77 +1,132 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix audio mute toggles to fully silence background music and SFX",
+  "title": "Fix app-wide language switching across pages, games, and React Query content",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make Background Music toggle Off immediately stop any currently playing background music (Android bridge mode and web fallback) and prevent resuming while muted.",
+      "summary": "Ensure changing the selected language updates all user-visible text across the entire app immediately, without reloads.",
       "acceptanceCriteria": [
-        "When Background Music is toggled Off while a track is playing, the background music stops immediately (no lingering audio)",
-        "When Background Music is toggled Off and the user navigates between pages, background music does not resume until toggled On",
-        "In non-Android (web fallback) mode, the HTMLAudioElement background track is paused and reset to time 0 when toggled Off",
-        "In Android WebView bridge mode, the app attempts to stop background music via the bridge if a stop/pause method is available; if no stop method exists, the implementation must still prevent any further background playback attempts while muted"
+        "When the user changes language via the language selector, all visible text on the currently open page updates immediately (same render cycle) to the selected language.",
+        "This includes at minimum: HomePage, GameZone, QuizZone, ColoringZone, Header, Footer, and any open modals/dialogs (e.g., CelebrationModal).",
+        "No full page reload is needed; the UI updates purely via React state/context changes."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useAppBackgroundMusic.ts",
+          "path": "frontend/src/contexts/LanguageContext.tsx",
           "operation": "modify",
-          "description": "Ensure that when the provided soundId becomes null (e.g., background music toggled Off), the hook explicitly stops background playback immediately and resets internal tracking refs so music does not resume across navigation while muted."
+          "description": "Expose a stable, reactive backend language value (derived from the selected UI language) from LanguageContext so that components and React Query hooks can reliably re-render/refetch on language changes."
         },
         {
-          "path": "frontend/src/services/audio.ts",
+          "path": "frontend/src/components/CelebrationModal.tsx",
           "operation": "modify",
-          "description": "Update background stop behavior to fully stop/reset web fallback playback (pause + set currentTime=0) and, in Android WebView bridge mode, attempt to stop/pause via any available bridge method while still clearing internal currentBackgroundId to prevent further playback attempts when muted."
+          "description": "Remove hardcoded dialog screen-reader description strings and derive them from translations so an open CelebrationModal updates its visible and sr-only text immediately when language changes."
         },
         {
-          "path": "frontend/src/types/androidBridge.d.ts",
+          "path": "frontend/src/components/games/ProblemSolvingGame.tsx",
           "operation": "modify",
-          "description": "Extend BackgroundAudioBridge typings to optionally include stop/pause-like methods (as optional function properties) so the web layer can safely attempt to stop background playback when available without assuming the method exists."
+          "description": "Ensure current problem scenario/options are recomputed or regenerated when language changes (including when showing backend-sourced LocalizedText) so the currently open game view updates without a reload."
+        },
+        {
+          "path": "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "operation": "modify",
+          "description": "Ensure language-dependent puzzle text (fallback puzzles and backend LocalizedText-derived content) updates immediately when language changes by including language in relevant computations/effects."
+        },
+        {
+          "path": "frontend/src/components/games/VisualRecognitionGame.tsx",
+          "operation": "modify",
+          "description": "Replace the hardcoded instruction sentence and any other user-facing text fragments with translations and ensure the rendered instruction updates immediately on language change."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Make background-music mute state changes trigger stop behavior immediately by updating the audio service and where mute state is synchronized.",
+      "summary": "Replace hardcoded non-localized UI strings with the translation system and make generated/fallback in-game text language-aware (especially ProblemSolvingGame).",
       "acceptanceCriteria": [
-        "Toggling Background Music Off causes stop behavior even if no new track start is initiated afterwards",
-        "Toggling Background Music On allows playback again using the currently selected track (after user interaction gating on web, as currently designed)"
+        "All previously hardcoded UI strings in pages/components are replaced with translated strings (via the existing translation approach used in other components).",
+        "ProblemSolvingGame must not generate Turkish-only scenario/option text; generated/fallback scenarios/options must be language-aware so switching between Turkish and English changes the displayed scenarios/options accordingly.",
+        "Any accessibility/screen-reader-only user-facing strings (e.g., dialog descriptions) are also localized or derived from existing translations so they reflect the selected language."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/services/audio.ts",
+          "path": "frontend/src/lib/translations.ts",
           "operation": "modify",
-          "description": "Change setBgMusicMuted(true) to immediately trigger the same stop behavior as an explicit stop call (including clearing currentBackgroundId and stopping any active web fallback audio), so muting does not rely on a subsequent start call."
+          "description": "Add missing translation keys for any newly-localized strings uncovered during the sweep (e.g., modal sr-only descriptions, image alt text labels, and game-specific instruction strings)."
         },
         {
-          "path": "frontend/src/contexts/AudioSettingsContext.tsx",
+          "path": "frontend/src/pages/HomePage.tsx",
           "operation": "modify",
-          "description": "Synchronize isBgMusicMuted changes to the audio service from within the provider (instead of relying on a specific UI component lifecycle), ensuring mute changes take effect immediately and reliably across the app."
+          "description": "Replace hardcoded image alt text (e.g., the mascot image) with translated strings from the existing translation system."
         },
         {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/pages/ColoringZone.tsx",
           "operation": "modify",
-          "description": "Remove or simplify local mute-to-audio-service synchronization effects if they become redundant after moving the synchronization to AudioSettingsProvider, keeping the Header focused on UI toggles only."
+          "description": "Replace hardcoded template image alt text with translated strings (or a translated pattern-based label) so it reflects the selected language."
+        },
+        {
+          "path": "frontend/src/components/games/MathPuzzleGame.tsx",
+          "operation": "modify",
+          "description": "Replace hardcoded image alt text with translated strings so it updates on language change."
+        },
+        {
+          "path": "frontend/src/components/games/VisualRecognitionGame.tsx",
+          "operation": "modify",
+          "description": "Replace hardcoded image alt text and the Turkish-only instruction line with translated strings."
+        },
+        {
+          "path": "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "operation": "modify",
+          "description": "Replace Turkish-only fallback scenarios/options with a language-aware fallback pool (at minimum Turkish and English) sourced from translations or from a language-aware fallback generator."
+        },
+        {
+          "path": "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "operation": "modify",
+          "description": "Replace Turkish-only fallback puzzle text (notably time/spatial puzzles and any remaining Turkish strings) with language-aware versions (at minimum Turkish and English) and ensure selection uses the active language."
+        },
+        {
+          "path": "frontend/src/lib/problemSolvingFallback.ts",
+          "operation": "create",
+          "description": "Create a centralized, language-aware fallback problem generator for ProblemSolvingGame that provides scenario/options/correctOption in at least Turkish and English, and falls back to English for other supported languages."
+        },
+        {
+          "path": "frontend/src/lib/logicPuzzleFallback.ts",
+          "operation": "create",
+          "description": "Create a centralized, language-aware fallback puzzle generator for LogicPuzzleGame for any puzzle types that currently contain hardcoded Turkish strings, with at least Turkish and English variants and English fallback."
+        },
+        {
+          "path": "frontend/src/lib/localizedText.ts",
+          "operation": "create",
+          "description": "Add a shared helper to resolve backend LocalizedText into the current UI language (with an English fallback) to avoid duplicating mapping logic and to ensure consistent language switching behavior across games."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Ensure SFX mute toggle fully mutes sound effects by reliably preventing new SFX playback while Off across the app.",
+      "summary": "Refetch/recompute language-dependent React Query data on language change by including backend language in query keys and refreshing derived local state.",
       "acceptanceCriteria": [
-        "When SFX is toggled Off, calls to the SFX playback function result in no sound output",
-        "When SFX is toggled On again, SFX playback works normally"
+        "Backend-sourced localized content (e.g., games list text, quiz questions, encouragement messages) updates when language changes.",
+        "React Query query keys for language-dependent queries include the current backend language value, and any derived local state from those queries is refreshed on language change (no stale language text remains)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/contexts/AudioSettingsContext.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Synchronize isSfxMuted changes to the audio service from within the provider so the global SFX mute flag is always up-to-date before any SFX playback calls occur."
+          "description": "Update language-dependent React Query query keys to include the current backend language value and ensure queries that return or contain localized content refresh when the language changes."
         },
         {
-          "path": "frontend/src/services/audio.ts",
+          "path": "frontend/src/hooks/useRandomizedQuizQuestions.ts",
           "operation": "modify",
-          "description": "Confirm playSound respects the global SFX mute flag consistently across Android bridge mode and web fallback (early return when muted), and keep behavior stable when toggling back On."
+          "description": "Ensure the randomized quiz questions query key and query function are explicitly tied to the current backend language value so changing language triggers a refetch and avoids stale localized questions."
+        },
+        {
+          "path": "frontend/src/pages/GameZone.tsx",
+          "operation": "modify",
+          "description": "Ensure any local derived state from language-dependent queries (e.g., displayed game name/description derived from backend data) is not cached in a way that prevents immediate updates when language changes."
+        },
+        {
+          "path": "frontend/src/pages/QuizZone.tsx",
+          "operation": "modify",
+          "description": "Ensure derived local state from backend quiz queries is re-initialized as needed on language changes so no stale-language question text remains in the active quiz session."
         }
       ]
     }

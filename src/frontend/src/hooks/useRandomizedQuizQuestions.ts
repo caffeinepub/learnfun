@@ -20,17 +20,17 @@ function mapAgeGroupToBackend(ageGroup: AgeGroup): string {
 
 export function useRandomizedQuizQuestions(ageGroup: AgeGroup, count: number) {
   const { actor, isFetching } = useActor();
-  const { getBackendLanguage } = useLanguage();
+  const { backendLanguage } = useLanguage();
   const backendAgeGroup = mapAgeGroupToBackend(ageGroup);
 
   return useQuery<SimpleQuestion[]>({
-    queryKey: ['randomized-quiz-questions', backendAgeGroup, getBackendLanguage(), count],
+    queryKey: ['randomized-quiz-questions', backendAgeGroup, backendLanguage, count],
     queryFn: async () => {
       if (!actor || !backendAgeGroup) return [];
       try {
         const questions = await actor.getRandomizedQuizQuestions(
           backendAgeGroup,
-          getBackendLanguage(),
+          backendLanguage,
           BigInt(count)
         );
         return questions || [];

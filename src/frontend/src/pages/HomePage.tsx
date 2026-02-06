@@ -22,7 +22,7 @@ export default function HomePage({ selectedAge, onAgeSelect, onNavigate }: HomeP
         <div className="flex justify-center mb-6">
           <img 
             src="/assets/generated/mascot-character-transparent.dim_200x200.png" 
-            alt="LearnFun Mascot"
+            alt={t.appName}
             className="w-32 h-32 md:w-40 md:h-40 animate-bounce-slow drop-shadow-2xl"
           />
         </div>
@@ -126,7 +126,7 @@ export default function HomePage({ selectedAge, onAgeSelect, onNavigate }: HomeP
                   <div className="pt-4">
                     <img 
                       src="/assets/generated/colorful-shapes.dim_400x300.png"
-                      alt="Colorful Shapes"
+                      alt={t.gameZone}
                       className="w-full h-32 object-contain"
                     />
                   </div>
@@ -155,7 +155,7 @@ export default function HomePage({ selectedAge, onAgeSelect, onNavigate }: HomeP
                   <div className="pt-4">
                     <img 
                       src="/assets/generated/happy-numbers.dim_600x400.png"
-                      alt="Happy Numbers"
+                      alt={t.quizZone}
                       className="w-full h-32 object-contain"
                     />
                   </div>
@@ -184,7 +184,7 @@ export default function HomePage({ selectedAge, onAgeSelect, onNavigate }: HomeP
                   <div className="pt-4">
                     <img 
                       src="/assets/generated/simple-cat-outline.dim_400x400.png"
-                      alt="Coloring Template"
+                      alt={t.coloringZone}
                       className="w-full h-32 object-contain"
                     />
                   </div>

@@ -2,12 +2,14 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-background-music-mute-toggle-fully-stops-any-currently-playing-background-music-when-switched-to-off-including-android-webview-bridge-mode-and-the-web-fallback",
-      "featureTitle": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
+      "featureId": "feature-fix-the-language-switch-regression-so-that-changing-the-language-updates-100-of-user-visible-text-across-the-entire-app-not-only-the-top-header-bar-without-requiring-a-page-reload",
+      "featureTitle": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
       "files": [
-        "frontend/src/hooks/useAppBackgroundMusic.ts",
-        "frontend/src/services/audio.ts",
-        "frontend/src/types/androidBridge.d.ts"
+        "frontend/src/components/CelebrationModal.tsx",
+        "frontend/src/components/games/LogicPuzzleGame.tsx",
+        "frontend/src/components/games/ProblemSolvingGame.tsx",
+        "frontend/src/components/games/VisualRecognitionGame.tsx",
+        "frontend/src/contexts/LanguageContext.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -23,12 +25,16 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-make-the-global-mute-state-changes-take-effect-immediately-and-reliably-by-updating-the-audio-service-so-that-setting-background-music-mute-to-true-triggers-the-stop-behavior-without-relying-on-a-subsequent-start-call",
-      "featureTitle": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
+      "featureId": "feature-remove-replace-hardcoded-non-localized-strings-in-pages-and-components-so-they-are-sourced-from-the-translation-system-languagecontext-translations-or-from-language-aware-backend-data-ensuring-all-in-game-generated-texts-also-switch-language-correctly",
+      "featureTitle": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
       "files": [
-        "frontend/src/components/Header.tsx",
-        "frontend/src/contexts/AudioSettingsContext.tsx",
-        "frontend/src/services/audio.ts"
+        "frontend/src/components/games/LogicPuzzleGame.tsx",
+        "frontend/src/components/games/ProblemSolvingGame.tsx",
+        "frontend/src/components/games/VisualRecognitionGame.tsx",
+        "frontend/src/lib/localizedText.ts",
+        "frontend/src/lib/logicPuzzleFallback.ts",
+        "frontend/src/lib/problemSolvingFallback.ts",
+        "frontend/src/pages/HomePage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -44,11 +50,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-sound-effects-sfx-mute-toggle-fully-mutes-sfx-by-preventing-any-new-sound-effects-from-playing-while-off-across-the-app",
-      "featureTitle": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
+      "featureId": "feature-ensure-react-query-data-that-is-language-dependent-is-refetched-or-recomputed-on-language-change-so-backend-sourced-localized-content-updates-consistently-across-the-app",
+      "featureTitle": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
       "files": [
-        "frontend/src/contexts/AudioSettingsContext.tsx",
-        "frontend/src/services/audio.ts"
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useRandomizedQuizQuestions.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",

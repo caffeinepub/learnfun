@@ -1,47 +1,42 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 3,
   "summary": "New project",
-  "architectural_notes": [],
+  "architectural_notes": [
+    "Ensure language selection is managed globally (e.g., i18n provider/context) so all UI strings re-render on language change, not just top bar."
+  ],
   "known_issues": [
-    "Audio toggle buttons do not fully mute sound when set to Off; expected complete silence when toggled off."
+    "Language switch currently only updates the top bar; the rest of the app content does not change language (regression; expected 100% of content to update)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-ensure-the-background-music-mute-toggle-fully-stops-any-currently-playing-background-music-when-switched-to-off-including-android-webview-bridge-mode-and-the-web-fallback",
-      "title": "Ensure the Background Music mute toggle fully stops any currently playing background music when switched to Off (including Android WebView bridge mode and the web fallback).",
+      "id": "feature-fix-the-language-switch-regression-so-that-changing-the-language-updates-100-of-user-visible-text-across-the-entire-app-not-only-the-top-header-bar-without-requiring-a-page-reload",
+      "title": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-make-the-global-mute-state-changes-take-effect-immediately-and-reliably-by-updating-the-audio-service-so-that-setting-background-music-mute-to-true-triggers-the-stop-behavior-without-relying-on-a-subsequent-start-call",
-      "title": "Make the global mute state changes take effect immediately and reliably by updating the audio service so that setting background-music mute to true triggers the stop behavior without relying on a subsequent start call.",
+      "id": "feature-remove-replace-hardcoded-non-localized-strings-in-pages-and-components-so-they-are-sourced-from-the-translation-system-languagecontext-translations-or-from-language-aware-backend-data-ensuring-all-in-game-generated-texts-also-switch-language-correctly",
+      "title": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-ensure-the-sound-effects-sfx-mute-toggle-fully-mutes-sfx-by-preventing-any-new-sound-effects-from-playing-while-off-across-the-app",
-      "title": "Ensure the Sound Effects (SFX) mute toggle fully mutes SFX by preventing any new sound effects from playing while Off across the app.",
+      "id": "feature-ensure-react-query-data-that-is-language-dependent-is-refetched-or-recomputed-on-language-change-so-backend-sourced-localized-content-updates-consistently-across-the-app",
+      "title": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Add two separate audio toggle buttons: one for background audio and one for other in-app sounds",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Untitled request",
+  "new_feature_requests": [],
+  "projectName": "Fix language switching so all app content updates across pages and games",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

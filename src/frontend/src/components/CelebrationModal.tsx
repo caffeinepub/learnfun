@@ -55,14 +55,15 @@ export default function CelebrationModal({
     }
   };
 
+  const descriptionText = isQuiz 
+    ? `${t.quizCompleted} ${level} ${t.correct} ${totalQuestions ? `/ ${totalQuestions}` : ''}`
+    : `${t.levelComplete} ${message || ''}`;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-gradient-to-br from-fun-yellow via-fun-orange to-fun-pink border-8 border-white shadow-2xl">
         <DialogDescription className="sr-only">
-          {isQuiz 
-            ? `Quiz completed with ${level} out of ${totalQuestions} correct answers. Congratulations on finishing!`
-            : `Level ${level} completed successfully. Great job! ${message || ''}`
-          }
+          {descriptionText}
         </DialogDescription>
         <div className="text-center space-y-6 py-8">
           {showConfetti && (
@@ -87,7 +88,7 @@ export default function CelebrationModal({
           <div className="flex justify-center animate-bounce">
             <img 
               src="/assets/generated/trophy-sparkles-transparent.dim_150x150.png"
-              alt="Trophy"
+              alt={t.congratulations}
               className="w-32 h-32 md:w-40 md:h-40 drop-shadow-2xl"
             />
           </div>
@@ -115,7 +116,7 @@ export default function CelebrationModal({
             <div className="flex justify-center">
               <img 
                 src="/assets/generated/celebration-elements-transparent.dim_300x300.png"
-                alt="Celebration"
+                alt={t.congratulations}
                 className="w-48 h-48 object-contain animate-pulse"
               />
             </div>

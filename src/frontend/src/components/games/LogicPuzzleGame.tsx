@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslation } from '../../lib/translations';
 import { useLogicPuzzles } from '../../hooks/useQueries';
-import type { LocalizedText } from '../../backend';
+import { resolveLocalizedText } from '../../lib/localizedText';
+import { getFallbackTimePuzzle, type PuzzleType, type AgeGroupKey } from '../../lib/logicPuzzleFallback';
 
 interface LogicPuzzleGameProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
@@ -19,7 +20,7 @@ type Puzzle = {
   question: string;
   answer: string;
   difficulty: number;
-  type: 'number' | 'pattern' | 'word' | 'spatial' | 'time';
+  type: PuzzleType;
 };
 
 export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicPuzzleGameProps) {
@@ -30,18 +31,9 @@ export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicP
   const [userAnswer, setUserAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [puzzlesSolved, setPuzzlesSolved] = useState(0);
-  const [puzzleType, setPuzzleType] = useState<'number' | 'pattern' | 'word' | 'spatial' | 'time'>('number');
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>('number');
   const [currentLevel, setCurrentLevel] = useState(1);
   const totalPuzzles = 7;
-
-  const getLocalizedText = (localized: LocalizedText): string => {
-    const langMap: Record<string, keyof LocalizedText> = {
-      tr: 'turkish', en: 'english', es: 'spanish', fr: 'french',
-      de: 'german', it: 'italian', ru: 'russian', pt: 'portuguese',
-      zh: 'chinese', ja: 'japanese'
-    };
-    return localized[langMap[language]];
-  };
 
   const generateNumberPuzzle = (): Puzzle => {
     if (ageGroup === '3-5') {
@@ -241,43 +233,6 @@ export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicP
     }
   };
 
-  const generateTimePuzzle = (): Puzzle => {
-    if (ageGroup === '3-5') {
-      const puzzles = [
-        { question: 'Sabah, ?', answer: 'Akşam', type: 'time' as const },
-        { question: 'Gündüz, ?', answer: 'Gece', type: 'time' as const },
-      ];
-      const selected = puzzles[Math.floor(Math.random() * puzzles.length)];
-      return { ...selected, difficulty: 1 };
-    } else if (ageGroup === '6-8') {
-      const puzzles = [
-        { question: 'Sabah, Öğle, ?', answer: 'Akşam', type: 'time' as const },
-        { question: 'Pazartesi, Salı, ?', answer: 'Çarşamba', type: 'time' as const },
-        { question: 'İlkbahar, Yaz, ?', answer: 'Sonbahar', type: 'time' as const },
-      ];
-      const selected = puzzles[Math.floor(Math.random() * puzzles.length)];
-      return { ...selected, difficulty: 1 };
-    } else if (ageGroup === '9-12') {
-      const puzzles = [
-        { question: 'Ocak, Şubat, Mart, ?', answer: 'Nisan', type: 'time' as const },
-        { question: '1 saat = ? dakika', answer: '60', type: 'time' as const },
-        { question: '1 hafta = ? gün', answer: '7', type: 'time' as const },
-        { question: 'Dün, Bugün, ?', answer: 'Yarın', type: 'time' as const },
-      ];
-      const selected = puzzles[Math.floor(Math.random() * puzzles.length)];
-      return { ...selected, difficulty: 2 };
-    } else {
-      const puzzles = [
-        { question: 'Ocak, Şubat, Mart, Nisan, ?', answer: 'Mayıs', type: 'time' as const },
-        { question: '1 gün = ? saat', answer: '24', type: 'time' as const },
-        { question: '1 yıl = ? ay', answer: '12', type: 'time' as const },
-        { question: 'Dün, Bugün, Yarın, ?', answer: 'Öbürgün', type: 'time' as const },
-      ];
-      const selected = puzzles[Math.floor(Math.random() * puzzles.length)];
-      return { ...selected, difficulty: 3 };
-    }
-  };
-
   const generatePuzzle = (): Puzzle => {
     switch (puzzleType) {
       case 'number':
@@ -289,7 +244,7 @@ export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicP
       case 'spatial':
         return generateSpatialPuzzle();
       case 'time':
-        return generateTimePuzzle();
+        return getFallbackTimePuzzle(ageGroup as AgeGroupKey, language);
       default:
         return generateNumberPuzzle();
     }
@@ -299,15 +254,15 @@ export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicP
     if (backendPuzzles && backendPuzzles.length > 0) {
       const puzzle = backendPuzzles[0];
       setCurrentPuzzle({
-        question: getLocalizedText(puzzle.question),
-        answer: getLocalizedText(puzzle.answer),
+        question: resolveLocalizedText(puzzle.question, language),
+        answer: resolveLocalizedText(puzzle.answer, language),
         difficulty: Number(puzzle.difficulty),
         type: 'number',
       });
     } else {
       setCurrentPuzzle(generatePuzzle());
     }
-  }, [backendPuzzles, ageGroup, puzzleType]);
+  }, [backendPuzzles, ageGroup, puzzleType, language]);
 
   const handleSubmit = () => {
     if (!currentPuzzle || !userAnswer.trim()) return;
@@ -337,16 +292,12 @@ export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicP
     }
   };
 
-  const handleTypeChange = (type: typeof puzzleType) => {
+  const handleTypeChange = (type: PuzzleType) => {
     setPuzzleType(type);
     setCurrentLevel(type === 'number' ? 1 : type === 'pattern' ? 2 : type === 'word' ? 3 : type === 'spatial' ? 4 : 5);
     setCurrentPuzzle(null);
     setTimeout(() => {
-      if (type === 'number') setCurrentPuzzle(generateNumberPuzzle());
-      else if (type === 'pattern') setCurrentPuzzle(generatePatternPuzzle());
-      else if (type === 'word') setCurrentPuzzle(generateWordPuzzle());
-      else if (type === 'spatial') setCurrentPuzzle(generateSpatialPuzzle());
-      else setCurrentPuzzle(generateTimePuzzle());
+      setCurrentPuzzle(generatePuzzle());
     }, 100);
   };
 
@@ -483,7 +434,7 @@ export default function LogicPuzzleGame({ ageGroup, onBack, onComplete }: LogicP
             <div className="flex justify-center pt-4">
               <img 
                 src={puzzleImage}
-                alt="Logic Puzzle"
+                alt={t.logicPuzzle}
                 className="w-64 h-48 object-contain animate-in fade-in duration-500"
               />
             </div>

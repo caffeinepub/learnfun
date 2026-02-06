@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Language } from '../backend';
 import type { LanguageCode } from '../lib/translations';
 
@@ -6,6 +6,7 @@ interface LanguageContextType {
   language: LanguageCode;
   setLanguage: (lang: LanguageCode) => void;
   getBackendLanguage: () => Language;
+  backendLanguage: Language;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -42,6 +43,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return DEFAULT_LANGUAGE;
   });
 
+  // Memoize backend language to ensure stable reference for React Query keys
+  const backendLanguage = useMemo(() => languageMap[language], [language]);
+
   useEffect(() => {
     localStorage.setItem('learnfun-language', language);
   }, [language]);
@@ -57,11 +61,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const getBackendLanguage = () => {
-    return languageMap[language];
+    return backendLanguage;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, getBackendLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, getBackendLanguage, backendLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
