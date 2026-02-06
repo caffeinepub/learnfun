@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslation } from '../../lib/translations';
 import { useMemoryGames } from '../../hooks/useQueries';
+import { playSound } from '../../services/audio';
 
 interface MemoryCardGameProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
@@ -124,6 +125,9 @@ export default function MemoryCardGame({ ageGroup, onBack, onComplete }: MemoryC
     const card = cards.find(c => c.id === cardId);
     if (!card || card.isFlipped || card.isMatched) return;
 
+    // Play card flip sound
+    playSound('card_flip');
+
     const newFlipped = [...flippedCards, cardId];
     setFlippedCards(newFlipped);
     
@@ -138,6 +142,7 @@ export default function MemoryCardGame({ ageGroup, onBack, onComplete }: MemoryC
       const secondCard = cards.find(c => c.id === secondId);
 
       if (firstCard && secondCard && firstCard.content === secondCard.content) {
+        playSound('match_success');
         toast.success(t.greatMatch, { duration: 1500 });
         setCards(cards.map(c => 
           c.id === firstId || c.id === secondId ? { ...c, isMatched: true } : c
@@ -150,11 +155,13 @@ export default function MemoryCardGame({ ageGroup, onBack, onComplete }: MemoryC
         const totalPairs = ageGroup === '3-5' ? 4 : ageGroup === '6-8' ? (difficulty === 1 ? 6 : 8) : ageGroup === '9-12' ? (difficulty === 1 ? 8 : difficulty === 2 ? 10 : 12) : (difficulty === 1 ? 10 : difficulty === 2 ? 12 : 14);
         if (newPairsFound === totalPairs) {
           setTimeout(() => {
+            playSound('level_complete');
             toast.success(`${t.levelComplete} 🎉`, { duration: 2000 });
             onComplete(currentLevel);
           }, 1000);
         }
       } else {
+        playSound('match_fail');
         toast.error(t.tryAgainShort, { duration: 1500 });
         setTimeout(() => {
           setCards(cards.map(c => 

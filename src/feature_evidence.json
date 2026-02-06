@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-complete-french-fr-ui-translation-pack-by-replacing-the-current-fr-commontranslations-fallback-with-an-explicit-french-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-french-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
-      "featureTitle": "Create a complete French (fr) UI translation pack by replacing the current `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts` (i.e., provide French values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "featureId": "feature-add-offline-support-for-the-react-app-by-implementing-a-service-worker-that-precaches-the-application-shell-and-key-static-assets-so-that-the-app-can-load-and-navigate-when-the-device-is-offline-at-minimum-load-the-home-page-and-previously-cached-routes-without-a-blank-screen",
+      "featureTitle": "Add offline support for the React app by implementing a Service Worker that precaches the application shell and key static assets, so that the app can load and navigate when the device is offline (at minimum: load the Home page and previously cached routes without a blank screen).",
       "files": [
-        "frontend/src/lib/translations.ts"
+        "frontend/public/sw.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -21,10 +21,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-create-a-complete-german-de-ui-translation-pack-by-replacing-the-current-de-commontranslations-fallback-with-an-explicit-german-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-german-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
-      "featureTitle": "Create a complete German (de) UI translation pack by replacing the current `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts` (i.e., provide German values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "featureId": "feature-register-the-service-worker-from-a-non-immutable-entry-point-do-not-modify-frontend-src-main-tsx-so-the-service-worker-is-installed-activated-in-production-builds",
+      "featureTitle": "Register the Service Worker from a non-immutable entry point (do not modify frontend/src/main.tsx) so the Service Worker is installed/activated in production builds.",
       "files": [
-        "frontend/src/lib/translations.ts"
+        "frontend/index.html"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -36,6 +36,45 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-android-webview-bridge-only-audio-mode-can-be-enabled-automatically-at-runtime-when-running-inside-an-android-webview-with-the-js-bridge-available-so-the-app-does-not-attempt-web-audio-fallback-that-can-cause-missing-file-or-user-gesture-playback-issues",
+      "featureTitle": "Ensure Android WebView “bridge-only audio” mode can be enabled automatically at runtime when running inside an Android WebView with the JS bridge available, so the app does not attempt web-audio fallback that can cause missing-file or user-gesture playback issues.",
+      "files": [
+        "frontend/index.html",
+        "frontend/src/config/audioConfig.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "blob-storage@4.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-documentation-to-include-a-final-copy-paste-ready-android-kotlin-mainactivity-example-that-configures-webview-for-offline-friendly-caching-and-reliable-audio-playback-and-that-loads-https-learnfun-h93-caffeine-xyz-while-exposing-the-androidaudio-and-backgroundaudio-js-interfaces",
+      "featureTitle": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, and that loads https://learnfun-h93.caffeine.xyz/ while exposing the AndroidAudio and BackgroundAudio JS interfaces.",
+      "files": [
+        "frontend/README.md"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "blob-storage@4.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

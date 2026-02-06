@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language } from '../backend';
-
-type LanguageCode = 'tr' | 'en' | 'es' | 'fr' | 'de' | 'it' | 'ru' | 'pt' | 'zh' | 'ja';
+import type { LanguageCode } from '../lib/translations';
 
 interface LanguageContextType {
   language: LanguageCode;
@@ -10,6 +9,9 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+const SUPPORTED_LANGUAGES: LanguageCode[] = ['tr', 'en', 'es', 'fr', 'de', 'it', 'ru', 'pt', 'zh'];
+const DEFAULT_LANGUAGE: LanguageCode = 'tr';
 
 const languageMap: Record<LanguageCode, Language> = {
   tr: Language.turkish,
@@ -21,13 +23,23 @@ const languageMap: Record<LanguageCode, Language> = {
   ru: Language.russian,
   pt: Language.portuguese,
   zh: Language.chinese,
-  ja: Language.japanese,
 };
+
+function isValidLanguage(lang: string): lang is LanguageCode {
+  return SUPPORTED_LANGUAGES.includes(lang as LanguageCode);
+}
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     const stored = localStorage.getItem('learnfun-language');
-    return (stored as LanguageCode) || 'tr';
+    if (stored && isValidLanguage(stored)) {
+      return stored;
+    }
+    // If stored language is invalid or not supported, fall back to default
+    if (stored && !isValidLanguage(stored)) {
+      localStorage.setItem('learnfun-language', DEFAULT_LANGUAGE);
+    }
+    return DEFAULT_LANGUAGE;
   });
 
   useEffect(() => {
@@ -35,7 +47,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [language]);
 
   const setLanguage = (lang: LanguageCode) => {
-    setLanguageState(lang);
+    if (isValidLanguage(lang)) {
+      setLanguageState(lang);
+    } else {
+      // If an unsupported language is attempted, fall back to default
+      setLanguageState(DEFAULT_LANGUAGE);
+      localStorage.setItem('learnfun-language', DEFAULT_LANGUAGE);
+    }
   };
 
   const getBackendLanguage = () => {

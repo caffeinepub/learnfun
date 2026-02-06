@@ -5,88 +5,28 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslation } from '../../lib/translations';
+import { selectSessionItems, getCategoriesForAge, type AgeGroupKey } from '../../lib/sortingClassificationSelection';
+import type { SortingItem } from '../../lib/sortingClassificationItemPools';
 
 interface SortingClassificationGameProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
   onBack: () => void;
   onComplete: (level: number) => void;
+  restartTrigger?: number;
 }
 
-type Item = {
-  id: string;
-  name: string;
-  category: string;
-  emoji: string;
-};
-
-const getItemsForAge = (ageGroup: string) => {
-  if (ageGroup === '3-5') {
-    return [
-      { id: '1', name: 'Apple', category: 'fruit', emoji: '🍎' },
-      { id: '2', name: 'Carrot', category: 'vegetable', emoji: '🥕' },
-      { id: '3', name: 'Banana', category: 'fruit', emoji: '🍌' },
-      { id: '4', name: 'Broccoli', category: 'vegetable', emoji: '🥦' },
-    ];
-  } else if (ageGroup === '6-8') {
-    return [
-      { id: '1', name: 'Apple', category: 'fruit', emoji: '🍎' },
-      { id: '2', name: 'Carrot', category: 'vegetable', emoji: '🥕' },
-      { id: '3', name: 'Banana', category: 'fruit', emoji: '🍌' },
-      { id: '4', name: 'Broccoli', category: 'vegetable', emoji: '🥦' },
-      { id: '5', name: 'Dog', category: 'animal', emoji: '🐕' },
-      { id: '6', name: 'Cat', category: 'animal', emoji: '🐈' },
-    ];
-  } else if (ageGroup === '9-12') {
-    return [
-      { id: '1', name: 'Apple', category: 'fruit', emoji: '🍎' },
-      { id: '2', name: 'Carrot', category: 'vegetable', emoji: '🥕' },
-      { id: '3', name: 'Banana', category: 'fruit', emoji: '🍌' },
-      { id: '4', name: 'Broccoli', category: 'vegetable', emoji: '🥦' },
-      { id: '5', name: 'Dog', category: 'animal', emoji: '🐕' },
-      { id: '6', name: 'Cat', category: 'animal', emoji: '🐈' },
-      { id: '7', name: 'Car', category: 'vehicle', emoji: '🚗' },
-      { id: '8', name: 'Bike', category: 'vehicle', emoji: '🚲' },
-    ];
-  } else {
-    return [
-      { id: '1', name: 'Apple', category: 'fruit', emoji: '🍎' },
-      { id: '2', name: 'Carrot', category: 'vegetable', emoji: '🥕' },
-      { id: '3', name: 'Banana', category: 'fruit', emoji: '🍌' },
-      { id: '4', name: 'Broccoli', category: 'vegetable', emoji: '🥦' },
-      { id: '5', name: 'Dog', category: 'animal', emoji: '🐕' },
-      { id: '6', name: 'Cat', category: 'animal', emoji: '🐈' },
-      { id: '7', name: 'Car', category: 'vehicle', emoji: '🚗' },
-      { id: '8', name: 'Bike', category: 'vehicle', emoji: '🚲' },
-      { id: '9', name: 'Book', category: 'object', emoji: '📚' },
-      { id: '10', name: 'Ball', category: 'object', emoji: '⚽' },
-    ];
-  }
-};
-
-const getCategoriesForAge = (ageGroup: string) => {
-  if (ageGroup === '3-5') {
-    return ['fruit', 'vegetable'];
-  } else if (ageGroup === '6-8') {
-    return ['fruit', 'vegetable', 'animal'];
-  } else if (ageGroup === '9-12') {
-    return ['fruit', 'vegetable', 'animal', 'vehicle'];
-  } else {
-    return ['fruit', 'vegetable', 'animal', 'vehicle', 'object'];
-  }
-};
-
-export default function SortingClassificationGame({ ageGroup, onBack, onComplete }: SortingClassificationGameProps) {
+export default function SortingClassificationGame({ ageGroup, onBack, onComplete, restartTrigger }: SortingClassificationGameProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
-  const [items, setItems] = useState<Item[]>([]);
-  const [categories] = useState<string[]>(getCategoriesForAge(ageGroup));
+  const [items, setItems] = useState<SortingItem[]>([]);
+  const [categories] = useState<string[]>(getCategoriesForAge(ageGroup as AgeGroupKey));
   const [sortedItems, setSortedItems] = useState<Record<string, string[]>>({});
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [remainingItems, setRemainingItems] = useState<Item[]>([]);
+  const [remainingItems, setRemainingItems] = useState<SortingItem[]>([]);
 
-  useEffect(() => {
-    const itemSet = getItemsForAge(ageGroup);
-    const shuffled = [...itemSet].sort(() => Math.random() - 0.5);
+  const initializeGame = () => {
+    const sessionItems = selectSessionItems(ageGroup as AgeGroupKey);
+    const shuffled = [...sessionItems].sort(() => Math.random() - 0.5);
     setItems(shuffled);
     setRemainingItems(shuffled);
     
@@ -95,7 +35,12 @@ export default function SortingClassificationGame({ ageGroup, onBack, onComplete
       initialSorted[cat] = [];
     });
     setSortedItems(initialSorted);
-  }, [ageGroup, categories]);
+    setSelectedItem(null);
+  };
+
+  useEffect(() => {
+    initializeGame();
+  }, [ageGroup, categories, restartTrigger]);
 
   const handleItemClick = (itemId: string) => {
     setSelectedItem(itemId);

@@ -113,7 +113,7 @@ export default function ColoringZone({ ageGroup, onBack }: ColoringZoneProps) {
                         {isFailed ? (
                           <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
                             <AlertCircle className="w-16 h-16 mb-2" />
-                            <p className="text-sm font-semibold">Image unavailable</p>
+                            <p className="text-sm font-semibold">{t.imageUnavailable}</p>
                           </div>
                         ) : (
                           <img
@@ -133,7 +133,7 @@ export default function ColoringZone({ ageGroup, onBack }: ColoringZoneProps) {
                         }`}
                       >
                         <Palette className="mr-2 h-5 w-5" />
-                        {isFailed ? 'Unavailable' : t.startColoring}
+                        {isFailed ? t.unavailable : t.startColoring}
                       </Button>
                     </CardContent>
                   </Card>

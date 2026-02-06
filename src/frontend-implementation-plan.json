@@ -1,39 +1,71 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add explicit French and German UI translation dictionaries",
+  "title": "Offline-capable app shell caching + Android WebView audio-only runtime config",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Replace the French (fr) fallback with a complete explicit French dictionary for all existing common UI keys.",
+      "summary": "Implement a Service Worker that precaches the app shell and applies runtime caching so the SPA can reload and navigate offline without a blank screen.",
       "acceptanceCriteria": [
-        "`frontend/src/lib/translations.ts` contains a `fr` entry with explicit French values for every key in `commonTranslations` (no spreading of `commonTranslations` for `fr`).",
-        "All existing keys in `commonTranslations` are present in `translations.fr` and translated to French.",
-        "Existing emojis/symbols (e.g., 🎉, ➡️, ⚡) remain present in the French strings where they exist in `commonTranslations`.",
-        "No non-French languages are modified except as necessary to add the explicit `fr` dictionary."
+        "A service worker file exists under the frontend’s static/public output (e.g., served from the site origin) and implements precache + runtime caching.",
+        "When the app is opened once online and then the device is set offline, reloading the app does not show a blank page (the app shell renders).",
+        "Caching strategy does not break normal online behavior (fresh loads still work and updates can be fetched)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/translations.ts",
-          "operation": "modify",
-          "description": "Replace `fr: commonTranslations` with an explicit `fr` dictionary containing French translations for every key currently in `commonTranslations`, preserving existing emojis/icons and keeping the translation key set identical (no added/removed keys)."
+          "path": "frontend/public/sw.js",
+          "operation": "create",
+          "description": "Create a production Service Worker that (1) precaches the SPA app shell (at minimum: the root document) and key static assets, (2) implements navigation-request handling that serves the cached app shell when offline to avoid blank screens, (3) applies runtime caching for same-origin built assets (e.g., /assets/*) using a safe strategy (e.g., stale-while-revalidate) to preserve normal online behavior, and (4) manages cache versioning + cleanup on activate so updates can be fetched."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Replace the German (de) fallback with a complete explicit German dictionary for all existing common UI keys.",
+      "summary": "Register the Service Worker from a non-immutable entry point so it installs/activates in production without modifying frontend/src/main.tsx.",
       "acceptanceCriteria": [
-        "`frontend/src/lib/translations.ts` contains a `de` entry with explicit German values for every key in `commonTranslations` (no spreading of `commonTranslations` for `de`).",
-        "All existing keys in `commonTranslations` are present in `translations.de` and translated to German.",
-        "Existing emojis/symbols (e.g., 🎉, ➡️, ⚡) remain present in the German strings where they exist in `commonTranslations`.",
-        "No non-German languages are modified except as necessary to add the explicit `de` dictionary."
+        "Service worker registration is added via an allowed file (e.g., frontend/index.html) without changing any immutable paths.",
+        "In production build, the browser devtools show the service worker is registered and controlling the page after reload."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/translations.ts",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Replace `de: commonTranslations` with an explicit `de` dictionary containing German translations for every key currently in `commonTranslations`, preserving existing emojis/icons and keeping the translation key set identical (no added/removed keys)."
+          "description": "Add Service Worker registration (only in supported browsers and production builds) via this HTML entry point (do not touch frontend/src/main.tsx), ensuring the registration runs early enough to install/activate and control the page after reload."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Auto-enable Android WebView bridge-only audio mode at runtime when the Android JS bridge is present, while keeping normal browser audio behavior unchanged.",
+      "acceptanceCriteria": [
+        "When window.Android is present, window.__AUDIO_CONFIG__.androidOnly is set to true early enough that the audio service respects Android-only mode (no HTMLAudioElement web fallback attempts when bridge methods are missing).",
+        "On normal browsers (no window.Android), existing web-audio behavior remains unchanged."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Inject an early inline script (before loading the React module) that detects Android WebView bridge availability (window.Android) and sets window.__AUDIO_CONFIG__.androidOnly = true so frontend/src/config/audioConfig.ts and frontend/src/services/audio.ts disable web-audio fallback only in that environment."
+        },
+        {
+          "path": "frontend/src/config/audioConfig.ts",
+          "operation": "modify",
+          "description": "Harden runtime config handling to safely read window.__AUDIO_CONFIG__.androidOnly and default to existing behavior when not set, ensuring the Android-only mode toggle remains backward-compatible for normal browsers."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Update frontend documentation with a final, copy/paste-ready Kotlin MainActivity snippet for offline-friendly WebView caching and reliable audio bridge playback loading the production URL.",
+      "acceptanceCriteria": [
+        "frontend/README.md includes an English Kotlin code block for MainActivity that (1) enables JavaScript + DOM storage, (2) sets mediaPlaybackRequiresUserGesture=false, (3) configures cache mode for offline-friendly behavior, (4) adds the AndroidAudio and BackgroundAudio JS interfaces, and (5) loads https://learnfun-h93.caffeine.xyz/.",
+        "The snippet is self-contained and consistent with the app’s documented audio bridge expectations (res/raw naming, bridge methods)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/README.md",
+          "operation": "modify",
+          "description": "Add/replace the Android Kotlin MainActivity documentation with a complete, copy/paste-ready English snippet that configures WebView settings for offline-friendly caching, sets mediaPlaybackRequiresUserGesture=false, exposes AndroidAudio and BackgroundAudio JS interfaces consistent with the app’s bridge expectations (res/raw naming + method names), and loads https://learnfun-h93.caffeine.xyz/. Also fix any broken/unfinished markdown code fences in the current Sound System section so the README renders correctly."
         }
       ]
     }

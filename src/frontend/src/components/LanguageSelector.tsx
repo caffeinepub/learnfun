@@ -19,7 +19,6 @@ const languages: { code: LanguageCode; name: string; flag: string }[] = [
   { code: 'ru', name: 'Русский', flag: '🇷🇺' },
   { code: 'pt', name: 'Português', flag: '🇵🇹' },
   { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
 ];
 
 export default function LanguageSelector() {
@@ -39,7 +38,10 @@ export default function LanguageSelector() {
           <span className="hidden md:inline">{currentLanguage?.name}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-48 bg-white dark:bg-gray-950 border-2 border-fun-purple/20 shadow-xl"
+      >
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}

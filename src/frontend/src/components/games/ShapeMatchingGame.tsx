@@ -5,83 +5,155 @@ import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useTranslation } from '../../lib/translations';
+import { getRoundConfig } from '../../lib/shapeMatchingRoundConfig';
+import { getRulesForAgeGroup, type ExtendedShape, type MatchingRule } from '../../lib/shapeMatchingRules';
+import { playSound } from '../../services/audio';
 
 interface ShapeMatchingGameProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
   onBack: () => void;
   onComplete: (level: number) => void;
+  restartTrigger?: number;
 }
 
-type Shape = {
-  id: string;
-  type: 'circle' | 'square' | 'triangle' | 'star' | 'heart' | 'hexagon';
-  color: string;
-};
-
-const shapes3to5: Shape[] = [
-  { id: '1', type: 'circle', color: '#FF6B6B' },
-  { id: '2', type: 'square', color: '#4ECDC4' },
-  { id: '3', type: 'circle', color: '#FF6B6B' },
-  { id: '4', type: 'square', color: '#4ECDC4' },
+const colorPalette = [
+  '#FF6B6B', '#4ECDC4', '#FFD93D', '#A8E6CF', '#FFB6C1', '#C7CEEA',
+  '#FF8C42', '#6C5CE7', '#00D2D3', '#FD79A8', '#FDCB6E', '#74B9FF',
+  '#A29BFE', '#55EFC4', '#FF7675', '#DFE6E9', '#00B894', '#E17055'
 ];
 
-const shapes6to8: Shape[] = [
-  { id: '1', type: 'circle', color: '#FF6B6B' },
-  { id: '2', type: 'square', color: '#4ECDC4' },
-  { id: '3', type: 'triangle', color: '#FFD93D' },
-  { id: '4', type: 'circle', color: '#FF6B6B' },
-  { id: '5', type: 'square', color: '#4ECDC4' },
-  { id: '6', type: 'triangle', color: '#FFD93D' },
-];
+const strokeColors = ['#000000', '#FF0000', '#0000FF', '#00FF00', '#FF00FF'];
 
-const shapes9to12: Shape[] = [
-  { id: '1', type: 'circle', color: '#FF6B6B' },
-  { id: '2', type: 'square', color: '#4ECDC4' },
-  { id: '3', type: 'triangle', color: '#FFD93D' },
-  { id: '4', type: 'star', color: '#A8E6CF' },
-  { id: '5', type: 'heart', color: '#FFB6C1' },
-  { id: '6', type: 'hexagon', color: '#C7CEEA' },
-  { id: '7', type: 'circle', color: '#FF6B6B' },
-  { id: '8', type: 'square', color: '#4ECDC4' },
-  { id: '9', type: 'triangle', color: '#FFD93D' },
-  { id: '10', type: 'star', color: '#A8E6CF' },
-  { id: '11', type: 'heart', color: '#FFB6C1' },
-  { id: '12', type: 'hexagon', color: '#C7CEEA' },
-];
-
-const shapes13to15: Shape[] = [
-  { id: '1', type: 'circle', color: '#FF6B6B' },
-  { id: '2', type: 'square', color: '#4ECDC4' },
-  { id: '3', type: 'triangle', color: '#FFD93D' },
-  { id: '4', type: 'star', color: '#A8E6CF' },
-  { id: '5', type: 'heart', color: '#FFB6C1' },
-  { id: '6', type: 'hexagon', color: '#C7CEEA' },
-  { id: '7', type: 'circle', color: '#FF6B6B' },
-  { id: '8', type: 'square', color: '#4ECDC4' },
-  { id: '9', type: 'triangle', color: '#FFD93D' },
-  { id: '10', type: 'star', color: '#A8E6CF' },
-  { id: '11', type: 'heart', color: '#FFB6C1' },
-  { id: '12', type: 'hexagon', color: '#C7CEEA' },
-  { id: '13', type: 'circle', color: '#8B5CF6' },
-  { id: '14', type: 'square', color: '#EC4899' },
-];
-
-export default function ShapeMatchingGame({ ageGroup, onBack, onComplete }: ShapeMatchingGameProps) {
+export default function ShapeMatchingGame({ ageGroup, onBack, onComplete, restartTrigger }: ShapeMatchingGameProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
-  const [shapes, setShapes] = useState<Shape[]>([]);
+  const [level, setLevel] = useState(1);
+  const [shapes, setShapes] = useState<ExtendedShape[]>([]);
   const [selectedShapes, setSelectedShapes] = useState<string[]>([]);
   const [matchedShapes, setMatchedShapes] = useState<string[]>([]);
   const [moves, setMoves] = useState(0);
+  const [currentRule, setCurrentRule] = useState<MatchingRule | null>(null);
+  const [totalPairs, setTotalPairs] = useState(0);
+
+  const initializeGame = (currentLevel: number) => {
+    const config = getRoundConfig(ageGroup, currentLevel);
+    const availableRules = getRulesForAgeGroup(ageGroup).filter(rule => 
+      config.allowedRules.includes(rule.id)
+    );
+    
+    const selectedRule = availableRules[Math.floor(Math.random() * availableRules.length)];
+    setCurrentRule(selectedRule);
+    
+    const generatedShapes = generateShapes(config, selectedRule);
+    const shuffled = [...generatedShapes].sort(() => Math.random() - 0.5);
+    
+    setShapes(shuffled);
+    setSelectedShapes([]);
+    setMatchedShapes([]);
+    setMoves(0);
+    setTotalPairs(config.pairCount);
+  };
+
+  const generateShapes = (config: any, rule: MatchingRule): ExtendedShape[] => {
+    const shapes: ExtendedShape[] = [];
+    const usedCombos = new Set<string>();
+    
+    for (let i = 0; i < config.pairCount; i++) {
+      let shape1: ExtendedShape;
+      let shape2: ExtendedShape;
+      let combo: string;
+      
+      do {
+        const baseType = config.shapeTypes[Math.floor(Math.random() * config.shapeTypes.length)] as ExtendedShape['type'];
+        const baseColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        const strokeStyle = config.useStrokeStyle ? (Math.random() > 0.5 ? 'dashed' : 'solid') as 'solid' | 'dashed' : 'solid';
+        const strokeColor = config.useStrokeStyle ? strokeColors[Math.floor(Math.random() * strokeColors.length)] : '#000000';
+        const rotation = config.useRotation ? Math.floor(Math.random() * 4) * 90 : 0;
+        const size = config.useSize ? (Math.random() > 0.5 ? 0.8 : 1.2) : 1;
+        
+        shape1 = {
+          id: `${i * 2 + 1}`,
+          type: baseType,
+          color: baseColor,
+          strokeStyle,
+          strokeColor,
+          rotation,
+          size,
+        };
+        
+        // Generate matching pair based on rule
+        shape2 = generateMatchingShape(shape1, rule, config);
+        shape2.id = `${i * 2 + 2}`;
+        
+        combo = `${shape1.type}-${shape1.color}-${shape1.strokeStyle}-${shape1.rotation}-${shape2.type}-${shape2.color}`;
+      } while (usedCombos.has(combo));
+      
+      usedCombos.add(combo);
+      shapes.push(shape1, shape2);
+    }
+    
+    return shapes;
+  };
+
+  const generateMatchingShape = (base: ExtendedShape, rule: MatchingRule, config: any): ExtendedShape => {
+    const match: ExtendedShape = { ...base };
+    
+    switch (rule.id) {
+      case 'matchExact':
+        // Keep everything the same
+        break;
+      
+      case 'matchShapeOnly':
+        // Same shape, different color
+        match.color = colorPalette.filter(c => c !== base.color)[Math.floor(Math.random() * (colorPalette.length - 1))];
+        break;
+      
+      case 'matchColorOnly':
+        // Same color, different shape
+        const differentShapes = config.shapeTypes.filter((s: string) => s !== base.type);
+        match.type = differentShapes[Math.floor(Math.random() * differentShapes.length)];
+        break;
+      
+      case 'matchShapeDifferentColor':
+        // Same shape, explicitly different color
+        match.color = colorPalette.filter(c => c !== base.color)[Math.floor(Math.random() * (colorPalette.length - 1))];
+        break;
+      
+      case 'matchStrokeStyle':
+        // Same stroke style, can vary other attributes
+        if (Math.random() > 0.5) {
+          match.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        }
+        break;
+      
+      case 'matchRotation':
+        // Same rotation, can vary other attributes
+        if (Math.random() > 0.5) {
+          match.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        }
+        break;
+      
+      case 'matchSize':
+        // Same size, can vary other attributes
+        if (Math.random() > 0.5) {
+          match.color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        }
+        break;
+    }
+    
+    return match;
+  };
 
   useEffect(() => {
-    const shapeSet = ageGroup === '3-5' ? shapes3to5 : ageGroup === '6-8' ? shapes6to8 : ageGroup === '9-12' ? shapes9to12 : shapes13to15;
-    const shuffled = [...shapeSet].sort(() => Math.random() - 0.5);
-    setShapes(shuffled);
-  }, [ageGroup]);
+    setLevel(1);
+    initializeGame(1);
+  }, [ageGroup, restartTrigger]);
 
   const handleShapeClick = (shapeId: string) => {
     if (selectedShapes.length === 2 || matchedShapes.includes(shapeId)) return;
+
+    // Play tap sound
+    playSound('tap_click');
 
     const newSelected = [...selectedShapes, shapeId];
     setSelectedShapes(newSelected);
@@ -89,49 +161,110 @@ export default function ShapeMatchingGame({ ageGroup, onBack, onComplete }: Shap
     if (newSelected.length === 2) {
       setMoves(moves + 1);
       const [first, second] = newSelected;
+      
+      if (first === second) {
+        playSound('match_fail');
+        toast.error(t.tryAgainShort, { duration: 1500 });
+        setTimeout(() => setSelectedShapes([]), 1000);
+        return;
+      }
+      
       const firstShape = shapes.find(s => s.id === first);
       const secondShape = shapes.find(s => s.id === second);
 
-      if (firstShape && secondShape && firstShape.type === secondShape.type && first !== second) {
-        toast.success(t.greatMatch, { duration: 1500 });
-        setMatchedShapes([...matchedShapes, first, second]);
-        setSelectedShapes([]);
+      if (firstShape && secondShape && currentRule) {
+        const isMatch = currentRule.evaluate(firstShape, secondShape);
+        
+        if (isMatch) {
+          playSound('match_success');
+          toast.success(t.greatMatch, { duration: 1500 });
+          const newMatched = [...matchedShapes, first, second];
+          setMatchedShapes(newMatched);
+          setSelectedShapes([]);
 
-        if (matchedShapes.length + 2 === shapes.length) {
-          setTimeout(() => onComplete(1), 1000);
+          if (newMatched.length === shapes.length) {
+            setTimeout(() => {
+              playSound('level_complete');
+              onComplete(level);
+              setLevel(level + 1);
+              initializeGame(level + 1);
+            }, 1000);
+          }
+        } else {
+          playSound('match_fail');
+          toast.error(t.tryAgainShort, { duration: 1500 });
+          setTimeout(() => setSelectedShapes([]), 1000);
         }
-      } else {
-        toast.error(t.tryAgainShort, { duration: 1500 });
-        setTimeout(() => setSelectedShapes([]), 1000);
       }
     }
   };
 
-  const renderShape = (shape: Shape) => {
-    const size = 80;
+  const renderShape = (shape: ExtendedShape) => {
+    const baseSize = 80;
+    const size = baseSize * (shape.size || 1);
+    const centerX = baseSize / 2;
+    const centerY = baseSize / 2;
+    
     const commonProps = {
       fill: shape.color,
-      stroke: '#fff',
+      stroke: shape.strokeColor || '#fff',
       strokeWidth: 3,
+      strokeDasharray: shape.strokeStyle === 'dashed' ? '5,5' : undefined,
     };
 
+    let shapeElement;
     switch (shape.type) {
       case 'circle':
-        return <circle cx={size/2} cy={size/2} r={size/3} {...commonProps} />;
+        shapeElement = <circle cx={centerX} cy={centerY} r={size/3} {...commonProps} />;
+        break;
       case 'square':
-        return <rect x={size/6} y={size/6} width={size*2/3} height={size*2/3} {...commonProps} />;
+        shapeElement = <rect x={centerX - size/3} y={centerY - size/3} width={size*2/3} height={size*2/3} {...commonProps} />;
+        break;
       case 'triangle':
-        return <polygon points={`${size/2},${size/6} ${size*5/6},${size*5/6} ${size/6},${size*5/6}`} {...commonProps} />;
+        shapeElement = <polygon points={`${centerX},${centerY - size/3} ${centerX + size/3},${centerY + size/3} ${centerX - size/3},${centerY + size/3}`} {...commonProps} />;
+        break;
       case 'star':
-        return <polygon points={`${size/2},${size/6} ${size*3/5},${size*2/5} ${size*5/6},${size*2/5} ${size*2/3},${size*3/5} ${size*3/4},${size*5/6} ${size/2},${size*2/3} ${size/4},${size*5/6} ${size/3},${size*3/5} ${size/6},${size*2/5} ${size*2/5},${size*2/5}`} {...commonProps} />;
+        shapeElement = <polygon points={`${centerX},${centerY - size/3} ${centerX + size/6},${centerY - size/12} ${centerX + size/3},${centerY - size/12} ${centerX + size/6},${centerY + size/12} ${centerX + size/4},${centerY + size/3} ${centerX},${centerX + size/6} ${centerX - size/4},${centerY + size/3} ${centerX - size/6},${centerY + size/12} ${centerX - size/3},${centerY - size/12} ${centerX - size/6},${centerY - size/12}`} {...commonProps} />;
+        break;
       case 'heart':
-        return <path d={`M ${size/2} ${size*5/6} C ${size/2} ${size*5/6}, ${size/6} ${size*3/5}, ${size/6} ${size*2/5} C ${size/6} ${size/6}, ${size*2/5} ${size/6}, ${size/2} ${size*2/5} C ${size*3/5} ${size/6}, ${size*5/6} ${size/6}, ${size*5/6} ${size*2/5} C ${size*5/6} ${size*3/5}, ${size/2} ${size*5/6}, ${size/2} ${size*5/6}`} {...commonProps} />;
+        shapeElement = <path d={`M ${centerX} ${centerY + size/3} C ${centerX} ${centerY + size/3}, ${centerX - size/3} ${centerY + size/12}, ${centerX - size/3} ${centerY - size/12} C ${centerX - size/3} ${centerY - size/3}, ${centerX - size/6} ${centerY - size/3}, ${centerX} ${centerY - size/12} C ${centerX + size/6} ${centerY - size/3}, ${centerX + size/3} ${centerY - size/3}, ${centerX + size/3} ${centerY - size/12} C ${centerX + size/3} ${centerY + size/12}, ${centerX} ${centerY + size/3}, ${centerX} ${centerY + size/3}`} {...commonProps} />;
+        break;
       case 'hexagon':
-        return <polygon points={`${size/2},${size/6} ${size*5/6},${size/3} ${size*5/6},${size*2/3} ${size/2},${size*5/6} ${size/6},${size*2/3} ${size/6},${size/3}`} {...commonProps} />;
+        shapeElement = <polygon points={`${centerX},${centerY - size/3} ${centerX + size/3},${centerY - size/6} ${centerX + size/3},${centerY + size/6} ${centerX},${centerY + size/3} ${centerX - size/3},${centerY + size/6} ${centerX - size/3},${centerY - size/6}`} {...commonProps} />;
+        break;
+      case 'diamond':
+        shapeElement = <polygon points={`${centerX},${centerY - size/3} ${centerX + size/3},${centerY} ${centerX},${centerY + size/3} ${centerX - size/3},${centerY}`} {...commonProps} />;
+        break;
+      case 'pentagon':
+        shapeElement = <polygon points={`${centerX},${centerY - size/3} ${centerX + size/3},${centerY - size/12} ${centerX + size/4},${centerY + size/3} ${centerX - size/4},${centerY + size/3} ${centerX - size/3},${centerY - size/12}`} {...commonProps} />;
+        break;
+      case 'oval':
+        shapeElement = <ellipse cx={centerX} cy={centerY} rx={size/3} ry={size/4} {...commonProps} />;
+        break;
+      case 'crescent':
+        shapeElement = (
+          <>
+            <circle cx={centerX} cy={centerY} r={size/3} {...commonProps} />
+            <circle cx={centerX + size/6} cy={centerY} r={size/3} fill="#fff" stroke="none" />
+          </>
+        );
+        break;
+      default:
+        shapeElement = <circle cx={centerX} cy={centerY} r={size/3} {...commonProps} />;
     }
+
+    return (
+      <g transform={`rotate(${shape.rotation || 0}, ${centerX}, ${centerY})`}>
+        {shapeElement}
+      </g>
+    );
   };
 
-  const gridCols = ageGroup === '3-5' ? 'grid-cols-2' : ageGroup === '6-8' ? 'grid-cols-3' : ageGroup === '9-12' ? 'grid-cols-4' : 'grid-cols-4';
+  const gridCols = ageGroup === '3-5' ? 'grid-cols-2' : 
+                   ageGroup === '6-8' ? 'grid-cols-3' : 
+                   ageGroup === '9-12' ? 'grid-cols-4' : 'grid-cols-4';
+
+  const pairsFound = matchedShapes.length / 2;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500">
@@ -144,8 +277,13 @@ export default function ShapeMatchingGame({ ageGroup, onBack, onComplete }: Shap
           <ArrowLeft className="w-6 h-6 mr-2" />
           {t.back}
         </Button>
-        <div className="text-white text-xl md:text-2xl font-bold bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full">
-          {t.moves}: {moves}
+        <div className="flex gap-4">
+          <div className="text-white text-xl md:text-2xl font-bold bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full">
+            {t.level}: {level}
+          </div>
+          <div className="text-white text-xl md:text-2xl font-bold bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full">
+            {t.moves}: {moves}
+          </div>
         </div>
       </div>
 
@@ -155,9 +293,16 @@ export default function ShapeMatchingGame({ ageGroup, onBack, onComplete }: Shap
             <h2 className="text-3xl md:text-4xl font-black text-fun-purple">
               {t.shapeMatching}
             </h2>
-            <p className="text-lg md:text-xl text-gray-700 font-semibold">
-              {t.findMatchingShapes}
-            </p>
+            {currentRule && (
+              <div className="bg-fun-yellow/20 border-2 border-fun-yellow rounded-xl p-4">
+                <p className="text-lg md:text-xl text-gray-800 font-bold">
+                  {t[currentRule.instructionKey as keyof typeof t] || currentRule.instructionKey}
+                </p>
+              </div>
+            )}
+            <div className="flex justify-center gap-8 text-lg font-semibold text-gray-700">
+              <span>{t.pairsFound}: {pairsFound} / {totalPairs}</span>
+            </div>
           </div>
 
           <div className={`grid ${gridCols} gap-4`}>

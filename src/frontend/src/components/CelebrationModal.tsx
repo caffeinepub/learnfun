@@ -1,13 +1,15 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { useEncouragementMessage } from '../hooks/useQueries';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../lib/translations';
+import { playSound } from '../services/audio';
 
 interface CelebrationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onContinue?: () => void;
   level: number;
   totalQuestions?: number;
   isQuiz?: boolean;
@@ -16,6 +18,7 @@ interface CelebrationModalProps {
 export default function CelebrationModal({ 
   isOpen, 
   onClose, 
+  onContinue,
   level, 
   totalQuestions,
   isQuiz = false 
@@ -23,19 +26,44 @@ export default function CelebrationModal({
   const { language } = useLanguage();
   const t = useTranslation(language);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [hasPlayedSound, setHasPlayedSound] = useState(false);
   const { data: message } = useEncouragementMessage(level);
 
   useEffect(() => {
     if (isOpen) {
       setShowConfetti(true);
+      
+      // Play celebration sound once per open
+      if (!hasPlayedSound) {
+        playSound('celebration');
+        setHasPlayedSound(true);
+      }
+      
       const timer = setTimeout(() => setShowConfetti(false), 3000);
       return () => clearTimeout(timer);
+    } else {
+      // Reset sound flag when modal closes
+      setHasPlayedSound(false);
     }
-  }, [isOpen]);
+  }, [isOpen, hasPlayedSound]);
+
+  const handleContinueClick = () => {
+    if (onContinue) {
+      onContinue();
+    } else {
+      onClose();
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-gradient-to-br from-fun-yellow via-fun-orange to-fun-pink border-8 border-white shadow-2xl">
+        <DialogDescription className="sr-only">
+          {isQuiz 
+            ? `Quiz completed with ${level} out of ${totalQuestions} correct answers. Congratulations on finishing!`
+            : `Level ${level} completed successfully. Great job! ${message || ''}`
+          }
+        </DialogDescription>
         <div className="text-center space-y-6 py-8">
           {showConfetti && (
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -94,7 +122,7 @@ export default function CelebrationModal({
           </div>
 
           <Button
-            onClick={onClose}
+            onClick={handleContinueClick}
             size="lg"
             className="h-16 px-12 text-2xl font-black bg-white text-fun-purple hover:bg-white/90 hover:scale-105 transition-transform shadow-xl"
           >

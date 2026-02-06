@@ -10,6 +10,7 @@ interface MathPuzzleGameProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
   onBack: () => void;
   onComplete: (level: number) => void;
+  restartTrigger?: number;
 }
 
 type MathProblem = {
@@ -18,146 +19,216 @@ type MathProblem = {
   options: number[];
 };
 
-export default function MathPuzzleGame({ ageGroup, onBack, onComplete }: MathPuzzleGameProps) {
+export default function MathPuzzleGame({ ageGroup, onBack, onComplete, restartTrigger }: MathPuzzleGameProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
   const [problem, setProblem] = useState<MathProblem | null>(null);
   const [score, setScore] = useState(0);
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
-  const totalQuestions = 5;
+  const totalQuestions = ageGroup === '3-5' ? 5 : ageGroup === '6-8' ? 7 : ageGroup === '9-12' ? 10 : 12;
 
   const generateProblem = (): MathProblem => {
     if (ageGroup === '3-5') {
-      const num1 = Math.floor(Math.random() * 5) + 1;
-      const num2 = Math.floor(Math.random() * 5) + 1;
-      const answer = num1 + num2;
-      const question = `${num1} + ${num2} = ?`;
-
-      const options = [answer];
-      while (options.length < 3) {
-        const wrong = answer + Math.floor(Math.random() * 6) - 3;
-        if (wrong > 0 && !options.includes(wrong)) {
-          options.push(wrong);
+      const problemTypes = ['addition', 'counting', 'simple'];
+      const type = problemTypes[Math.floor(Math.random() * problemTypes.length)];
+      
+      if (type === 'counting') {
+        const count = Math.floor(Math.random() * 5) + 1;
+        const answer = count;
+        const question = `🍎 `.repeat(count) + '= ?';
+        const options = [answer];
+        while (options.length < 3) {
+          const wrong = Math.floor(Math.random() * 7) + 1;
+          if (!options.includes(wrong)) options.push(wrong);
         }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else {
+        const num1 = Math.floor(Math.random() * 5) + 1;
+        const num2 = Math.floor(Math.random() * 5) + 1;
+        const answer = num1 + num2;
+        const question = `${num1} + ${num2} = ?`;
+        const options = [answer];
+        while (options.length < 3) {
+          const wrong = answer + Math.floor(Math.random() * 6) - 3;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
       }
-
-      return {
-        question,
-        answer,
-        options: options.sort(() => Math.random() - 0.5),
-      };
     } else if (ageGroup === '6-8') {
-      const num1 = Math.floor(Math.random() * 10) + 1;
-      const num2 = Math.floor(Math.random() * 10) + 1;
-      const operation = Math.random() > 0.5 ? '+' : '-';
+      const operations = ['+', '-', 'double', 'half'];
+      const operation = operations[Math.floor(Math.random() * operations.length)];
       
-      let answer: number;
-      let question: string;
-      
-      if (operation === '+') {
-        answer = num1 + num2;
-        question = `${num1} + ${num2} = ?`;
-      } else {
-        const larger = Math.max(num1, num2);
-        const smaller = Math.min(num1, num2);
-        answer = larger - smaller;
-        question = `${larger} - ${smaller} = ?`;
-      }
-
-      const options = [answer];
-      while (options.length < 3) {
-        const wrong = answer + Math.floor(Math.random() * 10) - 5;
-        if (wrong > 0 && !options.includes(wrong)) {
-          options.push(wrong);
+      if (operation === 'double') {
+        const num = Math.floor(Math.random() * 10) + 1;
+        const answer = num * 2;
+        const question = `${num} × 2 = ?`;
+        const options = [answer];
+        while (options.length < 3) {
+          const wrong = answer + Math.floor(Math.random() * 10) - 5;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
         }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else if (operation === 'half') {
+        const num = (Math.floor(Math.random() * 10) + 1) * 2;
+        const answer = num / 2;
+        const question = `${num} ÷ 2 = ?`;
+        const options = [answer];
+        while (options.length < 3) {
+          const wrong = answer + Math.floor(Math.random() * 8) - 4;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else {
+        const num1 = Math.floor(Math.random() * 15) + 1;
+        const num2 = Math.floor(Math.random() * 15) + 1;
+        let answer: number, question: string;
+        
+        if (operation === '+') {
+          answer = num1 + num2;
+          question = `${num1} + ${num2} = ?`;
+        } else {
+          const larger = Math.max(num1, num2);
+          const smaller = Math.min(num1, num2);
+          answer = larger - smaller;
+          question = `${larger} - ${smaller} = ?`;
+        }
+        
+        const options = [answer];
+        while (options.length < 3) {
+          const wrong = answer + Math.floor(Math.random() * 10) - 5;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
       }
-
-      return {
-        question,
-        answer,
-        options: options.sort(() => Math.random() - 0.5),
-      };
     } else if (ageGroup === '9-12') {
-      const num1 = Math.floor(Math.random() * 12) + 1;
-      const num2 = Math.floor(Math.random() * 12) + 1;
-      const operations = ['+', '-', '×'];
+      const operations = ['+', '-', '×', 'square', 'pattern'];
       const operation = operations[Math.floor(Math.random() * operations.length)];
       
-      let answer: number;
-      let question: string;
-      
-      if (operation === '+') {
-        answer = num1 + num2;
-        question = `${num1} + ${num2} = ?`;
-      } else if (operation === '-') {
-        const larger = Math.max(num1, num2);
-        const smaller = Math.min(num1, num2);
-        answer = larger - smaller;
-        question = `${larger} - ${smaller} = ?`;
-      } else {
-        answer = num1 * num2;
-        question = `${num1} × ${num2} = ?`;
-      }
-
-      const options = [answer];
-      while (options.length < 4) {
-        const wrong = answer + Math.floor(Math.random() * 20) - 10;
-        if (wrong > 0 && !options.includes(wrong)) {
-          options.push(wrong);
+      if (operation === 'square') {
+        const num = Math.floor(Math.random() * 10) + 1;
+        const answer = num * num;
+        const question = `${num}² = ?`;
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + Math.floor(Math.random() * 20) - 10;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
         }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else if (operation === 'pattern') {
+        const base = Math.floor(Math.random() * 5) + 2;
+        const step = Math.floor(Math.random() * 3) + 1;
+        const num1 = base;
+        const num2 = base + step;
+        const num3 = base + step * 2;
+        const answer = base + step * 3;
+        const question = `${num1}, ${num2}, ${num3}, ?`;
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + Math.floor(Math.random() * 10) - 5;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else {
+        const num1 = Math.floor(Math.random() * 15) + 1;
+        const num2 = Math.floor(Math.random() * 12) + 1;
+        let answer: number, question: string;
+        
+        if (operation === '+') {
+          answer = num1 + num2;
+          question = `${num1} + ${num2} = ?`;
+        } else if (operation === '-') {
+          const larger = Math.max(num1, num2);
+          const smaller = Math.min(num1, num2);
+          answer = larger - smaller;
+          question = `${larger} - ${smaller} = ?`;
+        } else {
+          answer = num1 * num2;
+          question = `${num1} × ${num2} = ?`;
+        }
+        
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + Math.floor(Math.random() * 20) - 10;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
       }
-
-      return {
-        question,
-        answer,
-        options: options.sort(() => Math.random() - 0.5),
-      };
     } else {
-      const num1 = Math.floor(Math.random() * 15) + 1;
-      const num2 = Math.floor(Math.random() * 15) + 1;
-      const operations = ['+', '-', '×', '÷'];
+      const operations = ['+', '-', '×', '÷', 'power', 'root', 'fraction'];
       const operation = operations[Math.floor(Math.random() * operations.length)];
       
-      let answer: number;
-      let question: string;
-      
-      if (operation === '+') {
-        answer = num1 + num2;
-        question = `${num1} + ${num2} = ?`;
-      } else if (operation === '-') {
-        const larger = Math.max(num1, num2);
-        const smaller = Math.min(num1, num2);
-        answer = larger - smaller;
-        question = `${larger} - ${smaller} = ?`;
-      } else if (operation === '×') {
-        answer = num1 * num2;
-        question = `${num1} × ${num2} = ?`;
-      } else {
-        const divisor = Math.floor(Math.random() * 10) + 1;
-        const dividend = divisor * (Math.floor(Math.random() * 10) + 1);
-        answer = dividend / divisor;
-        question = `${dividend} ÷ ${divisor} = ?`;
-      }
-
-      const options = [answer];
-      while (options.length < 4) {
-        const wrong = answer + Math.floor(Math.random() * 30) - 15;
-        if (wrong > 0 && !options.includes(wrong)) {
-          options.push(wrong);
+      if (operation === 'power') {
+        const base = Math.floor(Math.random() * 5) + 2;
+        const exp = Math.floor(Math.random() * 3) + 2;
+        const answer = Math.pow(base, exp);
+        const question = `${base}^${exp} = ?`;
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + Math.floor(Math.random() * 40) - 20;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
         }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else if (operation === 'root') {
+        const num = Math.floor(Math.random() * 10) + 1;
+        const answer = num;
+        const square = num * num;
+        const question = `√${square} = ?`;
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + Math.floor(Math.random() * 8) - 4;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else if (operation === 'fraction') {
+        const denominator = Math.floor(Math.random() * 4) + 2;
+        const numerator = Math.floor(Math.random() * (denominator - 1)) + 1;
+        const whole = Math.floor(Math.random() * 10) + 1;
+        const answer = (whole * denominator + numerator) / denominator;
+        const question = `${whole} ${numerator}/${denominator} = ?`;
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + (Math.floor(Math.random() * 6) - 3) * 0.5;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
+      } else {
+        const num1 = Math.floor(Math.random() * 20) + 1;
+        const num2 = Math.floor(Math.random() * 15) + 1;
+        let answer: number, question: string;
+        
+        if (operation === '+') {
+          answer = num1 + num2;
+          question = `${num1} + ${num2} = ?`;
+        } else if (operation === '-') {
+          const larger = Math.max(num1, num2);
+          const smaller = Math.min(num1, num2);
+          answer = larger - smaller;
+          question = `${larger} - ${smaller} = ?`;
+        } else if (operation === '×') {
+          answer = num1 * num2;
+          question = `${num1} × ${num2} = ?`;
+        } else {
+          const divisor = Math.floor(Math.random() * 12) + 1;
+          const dividend = divisor * (Math.floor(Math.random() * 15) + 1);
+          answer = dividend / divisor;
+          question = `${dividend} ÷ ${divisor} = ?`;
+        }
+        
+        const options = [answer];
+        while (options.length < 4) {
+          const wrong = answer + Math.floor(Math.random() * 30) - 15;
+          if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
+        }
+        return { question, answer, options: options.sort(() => Math.random() - 0.5) };
       }
-
-      return {
-        question,
-        answer,
-        options: options.sort(() => Math.random() - 0.5),
-      };
     }
   };
 
   useEffect(() => {
     setProblem(generateProblem());
-  }, [ageGroup]);
+    setScore(0);
+    setQuestionsAnswered(0);
+  }, [ageGroup, restartTrigger]);
 
   const handleAnswer = (selectedAnswer: number) => {
     if (!problem) return;

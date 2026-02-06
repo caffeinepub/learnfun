@@ -14,6 +14,7 @@ import {
   updateQuizHistory,
   getSessionSize,
 } from '../lib/quizQuestionSelection';
+import { playSound } from '../services/audio';
 
 interface QuizZoneProps {
   ageGroup: '3-5' | '6-8' | '9-12' | '13-15';
@@ -109,15 +110,20 @@ export default function QuizZone({ ageGroup, onBack }: QuizZoneProps) {
   const handleAnswerSelect = (answer: string) => {
     if (showResult) return;
     
+    // Play tap sound
+    playSound('tap_click');
+    
     setSelectedAnswer(answer);
     setShowResult(true);
     
     if (answer === question.correctAnswer) {
+      playSound('quiz_correct');
       setScore(score + 1);
       toast.success(t.correctAnswer, {
         duration: 2000,
       });
     } else {
+      playSound('quiz_wrong');
       toast.error(t.dontGiveUp, {
         duration: 2000,
       });

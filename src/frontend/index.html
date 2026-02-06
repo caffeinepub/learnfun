@@ -2,10 +2,37 @@
     <head>
         <meta charset='UTF-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-        <title>LearnFun   Educational Children&#x27;s App</title>
+        <title>LearnFun - Educational Children&#x27;s App</title>
+        
+        <!-- Early Android WebView audio configuration -->
+        <script>
+          // Detect Android WebView bridge and configure audio mode
+          (function() {
+            if (typeof window.Android !== 'undefined') {
+              // Android WebView detected - enable bridge-only audio mode
+              window.__AUDIO_CONFIG__ = window.__AUDIO_CONFIG__ || {};
+              window.__AUDIO_CONFIG__.androidOnly = true;
+            }
+          })();
+        </script>
     </head>
     <body>
         <div id='root'></div>
         <script type='module' src='/src/main.tsx'></script>
+        
+        <!-- Service Worker Registration -->
+        <script>
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                  console.log('ServiceWorker registration successful');
+                })
+                .catch(function(err) {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+          }
+        </script>
     </body>
 </html>

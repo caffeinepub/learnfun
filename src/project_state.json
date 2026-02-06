@@ -1,26 +1,42 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Localization project: add and maintain translation files for multiple languages.",
+  "summary": "Android WebView-based LearnFun app should support offline operation and reliable audio playback (no audio issues).",
   "architectural_notes": [
-    "Maintain separate translation files per language (e.g., Spanish, French, German)."
+    "App is an Android WebView wrapper that loads https://learnfun-h93.caffeine.xyz/ and exposes AndroidAudio/BackgroundAudio JS interfaces."
   ],
   "known_issues": [],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-complete-french-fr-ui-translation-pack-by-replacing-the-current-fr-commontranslations-fallback-with-an-explicit-french-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-french-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
-      "title": "Create a complete French (fr) UI translation pack by replacing the current `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts` (i.e., provide French values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "id": "feature-add-offline-support-for-the-react-app-by-implementing-a-service-worker-that-precaches-the-application-shell-and-key-static-assets-so-that-the-app-can-load-and-navigate-when-the-device-is-offline-at-minimum-load-the-home-page-and-previously-cached-routes-without-a-blank-screen",
+      "title": "Add offline support for the React app by implementing a Service Worker that precaches the application shell and key static assets, so that the app can load and navigate when the device is offline (at minimum: load the Home page and previously cached routes without a blank screen).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-a-complete-german-de-ui-translation-pack-by-replacing-the-current-de-commontranslations-fallback-with-an-explicit-german-dictionary-in-frontend-src-lib-translations-ts-i-e-provide-german-values-for-all-keys-currently-present-in-commontranslations-preserving-any-emojis-icons-where-they-exist",
-      "title": "Create a complete German (de) UI translation pack by replacing the current `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts` (i.e., provide German values for all keys currently present in `commonTranslations`, preserving any emojis/icons where they exist).",
+      "id": "feature-register-the-service-worker-from-a-non-immutable-entry-point-do-not-modify-frontend-src-main-tsx-so-the-service-worker-is-installed-activated-in-production-builds",
+      "title": "Register the Service Worker from a non-immutable entry point (do not modify frontend/src/main.tsx) so the Service Worker is installed/activated in production builds.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-android-webview-bridge-only-audio-mode-can-be-enabled-automatically-at-runtime-when-running-inside-an-android-webview-with-the-js-bridge-available-so-the-app-does-not-attempt-web-audio-fallback-that-can-cause-missing-file-or-user-gesture-playback-issues",
+      "title": "Ensure Android WebView “bridge-only audio” mode can be enabled automatically at runtime when running inside an Android WebView with the JS bridge available, so the app does not attempt web-audio fallback that can cause missing-file or user-gesture playback issues.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-documentation-to-include-a-final-copy-paste-ready-android-kotlin-mainactivity-example-that-configures-webview-for-offline-friendly-caching-and-reliable-audio-playback-and-that-loads-https-learnfun-h93-caffeine-xyz-while-exposing-the-androidaudio-and-backgroundaudio-js-interfaces",
+      "title": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, and that loads https://learnfun-h93.caffeine.xyz/ while exposing the AndroidAudio and BackgroundAudio JS interfaces.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -28,12 +44,19 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add French and German language translation files (localization support)",
+      "summary": "Add offline support for the WebView app so it can run without internet connectivity.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Ensure audio playback works reliably in the WebView app (no audio-related issues).",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Add complete French (fr) and German (de) UI translation packs",
+  "gameProjectType": "none",
+  "projectName": "com.learnfun.game",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

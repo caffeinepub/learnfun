@@ -1,46 +1,41 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T19:01:10.621Z",
-  "summary": "The diff shows edits to `frontend/src/lib/translations.ts`, but the provided truncated excerpt does not include the `translations` object entries for `fr` or `de`, so the requested explicit French/German dictionaries cannot be verified from the available evidence. Additionally, two non-requested files (`frontend-file-summaries.txt` and `project_state.json`) were modified.",
+  "generatedAt": "2026-02-06T11:58:08.902Z",
+  "summary": "Implemented a service worker (precache + runtime caching), registered it via frontend/index.html (without touching main.tsx), and added early Android bridge detection to set window.__AUDIO_CONFIG__.androidOnly. Documentation updates for an Android Kotlin MainActivity example appear missing/incomplete in the provided diff summary.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Replace the `fr: commonTranslations` fallback with an explicit French dictionary in `frontend/src/lib/translations.ts`, providing French values for every existing key in `commonTranslations` (no spreading), preserving emojis/symbols.",
-      "reason": "The diff excerpt for `frontend/src/lib/translations.ts` is truncated and only shows the beginning of `commonTranslations`; it does not show any `fr` translation entry, so there is no evidence that `translations.fr` was changed from a fallback to an explicit French dictionary or that all keys/emojis were translated/preserved.",
+      "id": "REQ-4",
+      "requirement": "Update documentation to include a final, copy/paste-ready Android Kotlin MainActivity example that configures WebView for offline-friendly caching and reliable audio playback, loads https://learnfun-h93.caffeine.xyz/, and exposes the AndroidAudio and BackgroundAudio JS interfaces.",
+      "reason": "The diff shows frontend/README.md updates about offline support and audio files, but does not show the required self-contained Kotlin MainActivity code block or any mention of addJavascriptInterface calls for AndroidAudio/BackgroundAudio, WebView cache mode, or loading the specified URL. The README content shown is truncated and ends before any Kotlin snippet appears.",
       "evidence": [
-        "frontend/src/lib/translations.ts (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Replace the `de: commonTranslations` fallback with an explicit German dictionary in `frontend/src/lib/translations.ts`, providing German values for every existing key in `commonTranslations` (no spreading), preserving emojis/symbols.",
-      "reason": "The diff excerpt for `frontend/src/lib/translations.ts` is truncated and does not show any `de` translation entry, so there is no evidence that `translations.de` was changed from a fallback to an explicit German dictionary or that all keys/emojis were translated/preserved.",
-      "evidence": [
-        "frontend/src/lib/translations.ts (truncated)"
+        "frontend/README.md"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Modified `frontend-file-summaries.txt` to describe broad frontend behavior/features (e.g., new game types, daily surprise section, quiz randomization) beyond the requested translation-pack changes.",
-      "reason": "The BuildRequest only asks for adding explicit French and German translation dictionaries in `frontend/src/lib/translations.ts` and does not request updating summary/metadata files or documenting unrelated functionality.",
-      "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Modified `project_state.json` to add/track new feature requests (AR-1/AR-2/AR-3) and mark them pending.",
-      "reason": "The BuildRequest does not request changes to project tracking/state files; only translation pack updates were requested.",
+      "description": "Updated/added internal tracking metadata (project_state.json) unrelated to the specified functional requirements.",
+      "reason": "The BuildRequest does not ask for changes to project tracking files; only offline SW, SW registration, Android audio config runtime behavior, and README Kotlin snippet were requested.",
       "evidence": [
         "project_state.json"
       ]
+    },
+    {
+      "description": "Modified/generated frontend-file-summaries.txt.",
+      "reason": "Not requested by the BuildRequest requirements or acceptance criteria; appears to be auxiliary documentation/analysis output.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/lib/translations.ts",
+    "frontend/README.md",
+    "frontend/index.html",
+    "frontend/public/sw.js",
+    "frontend/src/config/audioConfig.ts",
     "project_state.json"
   ]
 }

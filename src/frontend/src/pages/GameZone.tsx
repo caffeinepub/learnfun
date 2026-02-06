@@ -30,6 +30,7 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [completedLevel, setCompletedLevel] = useState(1);
+  const [restartTrigger, setRestartTrigger] = useState(0);
 
   const dailySurpriseGame = getDailySurpriseGame(ageGroup);
 
@@ -41,6 +42,11 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
   const handleCelebrationClose = () => {
     setShowCelebration(false);
     setSelectedGame(null);
+  };
+
+  const handleContinue = () => {
+    setShowCelebration(false);
+    setRestartTrigger(prev => prev + 1);
   };
 
   if (isLoading) {
@@ -61,10 +67,12 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
           ageGroup={ageGroup} 
           onBack={() => setSelectedGame(null)}
           onComplete={handleGameComplete}
+          restartTrigger={restartTrigger}
         />
         <CelebrationModal 
           isOpen={showCelebration}
           onClose={handleCelebrationClose}
+          onContinue={handleContinue}
           level={completedLevel}
         />
       </>
@@ -78,10 +86,12 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
           ageGroup={ageGroup} 
           onBack={() => setSelectedGame(null)}
           onComplete={handleGameComplete}
+          restartTrigger={restartTrigger}
         />
         <CelebrationModal 
           isOpen={showCelebration}
           onClose={handleCelebrationClose}
+          onContinue={handleContinue}
           level={completedLevel}
         />
       </>
@@ -163,10 +173,12 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
           ageGroup={ageGroup} 
           onBack={() => setSelectedGame(null)}
           onComplete={handleGameComplete}
+          restartTrigger={restartTrigger}
         />
         <CelebrationModal 
           isOpen={showCelebration}
           onClose={handleCelebrationClose}
+          onContinue={handleContinue}
           level={completedLevel}
         />
       </>
@@ -180,10 +192,12 @@ export default function GameZone({ ageGroup, onBack }: GameZoneProps) {
           ageGroup={ageGroup} 
           onBack={() => setSelectedGame(null)}
           onComplete={handleGameComplete}
+          restartTrigger={restartTrigger}
         />
         <CelebrationModal 
           isOpen={showCelebration}
           onClose={handleCelebrationClose}
+          onContinue={handleContinue}
           level={completedLevel}
         />
       </>

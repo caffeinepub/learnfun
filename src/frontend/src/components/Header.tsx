@@ -1,15 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Home } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
+import BackgroundMusicSelectorModal from './BackgroundMusicSelectorModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from '../lib/translations';
 
 interface HeaderProps {
   onBackToHome: () => void;
-  showBackButton: boolean;
 }
 
-export default function Header({ onBackToHome, showBackButton }: HeaderProps) {
+export default function Header({ onBackToHome }: HeaderProps) {
   const { language } = useLanguage();
   const t = useTranslation(language);
 
@@ -28,18 +28,17 @@ export default function Header({ onBackToHome, showBackButton }: HeaderProps) {
             </h1>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <BackgroundMusicSelectorModal />
             <LanguageSelector />
-            {showBackButton && (
-              <Button
-                onClick={onBackToHome}
-                size="lg"
-                className="bg-white/90 hover:bg-white text-fun-purple font-bold shadow-lg"
-              >
-                <Home className="w-5 h-5 md:w-6 md:h-6 mr-2" />
-                <span className="hidden md:inline">{t.home}</span>
-              </Button>
-            )}
+            <Button
+              onClick={onBackToHome}
+              size="lg"
+              className="bg-white/90 hover:bg-white text-fun-purple font-bold shadow-lg"
+            >
+              <Home className="w-5 h-5 md:w-6 md:h-6 mr-2" />
+              <span className="hidden md:inline">{t.home}</span>
+            </Button>
           </div>
         </div>
       </div>
