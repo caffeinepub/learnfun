@@ -2,59 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-language-switch-regression-so-that-changing-the-language-updates-100-of-user-visible-text-across-the-entire-app-not-only-the-top-header-bar-without-requiring-a-page-reload",
-      "featureTitle": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
+      "featureId": "feature-complete-or-ly-map-missing-translation-keys-so-that-es-fr-de-it-ru-pt-zh-ja-do-not-silently-fall-back-to-the-english-commontranslations-values-for-strings-used-in-game-zone-quiz-zone-and-coloring-zone-including-sub-features-like-daily-surprise-card-labels-and-in-game-category-labels",
+      "featureTitle": "Complete or корректly map missing translation keys so that es/fr/de/it/ru/pt/zh/ja do not silently fall back to the English `commonTranslations` values for strings used in Game Zone, Quiz Zone, and Coloring Zone (including sub-features like Daily Surprise card labels and in-game category labels).",
       "files": [
-        "frontend/src/components/CelebrationModal.tsx",
-        "frontend/src/components/games/LogicPuzzleGame.tsx",
-        "frontend/src/components/games/ProblemSolvingGame.tsx",
-        "frontend/src/components/games/VisualRecognitionGame.tsx",
-        "frontend/src/contexts/LanguageContext.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "blob-storage@4.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-remove-replace-hardcoded-non-localized-strings-in-pages-and-components-so-they-are-sourced-from-the-translation-system-languagecontext-translations-or-from-language-aware-backend-data-ensuring-all-in-game-generated-texts-also-switch-language-correctly",
-      "featureTitle": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
-      "files": [
-        "frontend/src/components/games/LogicPuzzleGame.tsx",
-        "frontend/src/components/games/ProblemSolvingGame.tsx",
-        "frontend/src/components/games/VisualRecognitionGame.tsx",
-        "frontend/src/lib/localizedText.ts",
-        "frontend/src/lib/logicPuzzleFallback.ts",
-        "frontend/src/lib/problemSolvingFallback.ts",
-        "frontend/src/pages/HomePage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "blob-storage@4.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-react-query-data-that-is-language-dependent-is-refetched-or-recomputed-on-language-change-so-backend-sourced-localized-content-updates-consistently-across-the-app",
-      "featureTitle": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
-      "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/hooks/useRandomizedQuizQuestions.ts"
+        "frontend/src/lib/translations.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",

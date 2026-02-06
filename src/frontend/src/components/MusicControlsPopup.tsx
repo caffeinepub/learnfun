@@ -74,7 +74,7 @@ export default function MusicControlsPopup() {
           {/* Track Selection */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Background Track
+              {t.backgroundTrack}
             </Label>
             <RadioGroup value={selectedTrack} onValueChange={handleTrackSelect}>
               <div className="space-y-2">
@@ -88,7 +88,7 @@ export default function MusicControlsPopup() {
                       htmlFor={option.id}
                       className="flex-1 cursor-pointer text-sm font-medium"
                     >
-                      {option.label}
+                      {t[option.labelKey as keyof typeof t]}
                     </Label>
                   </div>
                 ))}

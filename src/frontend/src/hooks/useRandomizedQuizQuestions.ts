@@ -4,7 +4,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import type { SimpleQuestion } from '../backend';
 import type { AgeGroup } from '../App';
 
-// Map frontend age group strings to backend age group strings
 function mapAgeGroupToBackend(ageGroup: AgeGroup): string {
   if (!ageGroup) return '';
   
@@ -18,7 +17,7 @@ function mapAgeGroupToBackend(ageGroup: AgeGroup): string {
   return mapping[ageGroup] || '';
 }
 
-export function useRandomizedQuizQuestions(ageGroup: AgeGroup, count: number) {
+export function useRandomizedQuizQuestions(ageGroup: AgeGroup, count: number = 10) {
   const { actor, isFetching } = useActor();
   const { backendLanguage } = useLanguage();
   const backendAgeGroup = mapAgeGroupToBackend(ageGroup);
@@ -40,7 +39,7 @@ export function useRandomizedQuizQuestions(ageGroup: AgeGroup, count: number) {
       }
     },
     enabled: !!actor && !isFetching && !!backendAgeGroup,
-    staleTime: 0, // Always fetch fresh randomized questions
+    staleTime: 5 * 60 * 1000,
     retry: 1,
   });
 }

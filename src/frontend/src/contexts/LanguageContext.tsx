@@ -1,71 +1,56 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { Language } from '../backend';
 import type { LanguageCode } from '../lib/translations';
 
 interface LanguageContextType {
   language: LanguageCode;
   setLanguage: (lang: LanguageCode) => void;
-  getBackendLanguage: () => Language;
   backendLanguage: Language;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const SUPPORTED_LANGUAGES: LanguageCode[] = ['tr', 'en', 'es', 'fr', 'de', 'it', 'ru', 'pt', 'zh'];
-const DEFAULT_LANGUAGE: LanguageCode = 'tr';
+const SUPPORTED_LANGUAGES: LanguageCode[] = ['tr', 'en', 'es', 'fr', 'de', 'it', 'ru', 'pt', 'zh', 'ja'];
 
-const languageMap: Record<LanguageCode, Language> = {
-  tr: Language.turkish,
-  en: Language.english,
-  es: Language.spanish,
-  fr: Language.french,
-  de: Language.german,
-  it: Language.italian,
-  ru: Language.russian,
-  pt: Language.portuguese,
-  zh: Language.chinese,
-};
-
-function isValidLanguage(lang: string): lang is LanguageCode {
-  return SUPPORTED_LANGUAGES.includes(lang as LanguageCode);
+function mapLanguageToBackend(lang: LanguageCode): Language {
+  const mapping: Record<LanguageCode, Language> = {
+    tr: Language.turkish,
+    en: Language.english,
+    es: Language.spanish,
+    fr: Language.french,
+    de: Language.german,
+    it: Language.italian,
+    ru: Language.russian,
+    pt: Language.portuguese,
+    zh: Language.chinese,
+    ja: Language.japanese,
+  };
+  return mapping[lang] || Language.english;
 }
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(() => {
-    const stored = localStorage.getItem('learnfun-language');
-    if (stored && isValidLanguage(stored)) {
+    const stored = localStorage.getItem('language') as LanguageCode;
+    if (stored && SUPPORTED_LANGUAGES.includes(stored)) {
       return stored;
     }
-    // If stored language is invalid or not supported, fall back to default
-    if (stored && !isValidLanguage(stored)) {
-      localStorage.setItem('learnfun-language', DEFAULT_LANGUAGE);
-    }
-    return DEFAULT_LANGUAGE;
+    return 'en';
   });
 
-  // Memoize backend language to ensure stable reference for React Query keys
-  const backendLanguage = useMemo(() => languageMap[language], [language]);
+  const backendLanguage = useMemo(() => mapLanguageToBackend(language), [language]);
 
   useEffect(() => {
-    localStorage.setItem('learnfun-language', language);
+    localStorage.setItem('language', language);
   }, [language]);
 
   const setLanguage = (lang: LanguageCode) => {
-    if (isValidLanguage(lang)) {
+    if (SUPPORTED_LANGUAGES.includes(lang)) {
       setLanguageState(lang);
-    } else {
-      // If an unsupported language is attempted, fall back to default
-      setLanguageState(DEFAULT_LANGUAGE);
-      localStorage.setItem('learnfun-language', DEFAULT_LANGUAGE);
     }
   };
 
-  const getBackendLanguage = () => {
-    return backendLanguage;
-  };
-
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, getBackendLanguage, backendLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, backendLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -74,7 +59,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error('useLanguage must be used within LanguageProvider');
   }
   return context;
 }

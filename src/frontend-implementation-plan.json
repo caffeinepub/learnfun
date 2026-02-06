@@ -1,132 +1,142 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix app-wide language switching across pages, games, and React Query content",
+  "title": "App-wide instant i18n switching across Game/Quiz/Coloring zones",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Ensure changing the selected language updates all user-visible text across the entire app immediately, without reloads.",
+      "summary": "Make language changes from the header trigger immediate UI re-render across all zones without navigation/refresh while preserving existing localStorage persistence.",
       "acceptanceCriteria": [
-        "When the user changes language via the language selector, all visible text on the currently open page updates immediately (same render cycle) to the selected language.",
-        "This includes at minimum: HomePage, GameZone, QuizZone, ColoringZone, Header, Footer, and any open modals/dialogs (e.g., CelebrationModal).",
-        "No full page reload is needed; the UI updates purely via React state/context changes."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/contexts/LanguageContext.tsx",
-          "operation": "modify",
-          "description": "Expose a stable, reactive backend language value (derived from the selected UI language) from LanguageContext so that components and React Query hooks can reliably re-render/refetch on language changes."
-        },
-        {
-          "path": "frontend/src/components/CelebrationModal.tsx",
-          "operation": "modify",
-          "description": "Remove hardcoded dialog screen-reader description strings and derive them from translations so an open CelebrationModal updates its visible and sr-only text immediately when language changes."
-        },
-        {
-          "path": "frontend/src/components/games/ProblemSolvingGame.tsx",
-          "operation": "modify",
-          "description": "Ensure current problem scenario/options are recomputed or regenerated when language changes (including when showing backend-sourced LocalizedText) so the currently open game view updates without a reload."
-        },
-        {
-          "path": "frontend/src/components/games/LogicPuzzleGame.tsx",
-          "operation": "modify",
-          "description": "Ensure language-dependent puzzle text (fallback puzzles and backend LocalizedText-derived content) updates immediately when language changes by including language in relevant computations/effects."
-        },
-        {
-          "path": "frontend/src/components/games/VisualRecognitionGame.tsx",
-          "operation": "modify",
-          "description": "Replace the hardcoded instruction sentence and any other user-facing text fragments with translations and ensure the rendered instruction updates immediately on language change."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Replace hardcoded non-localized UI strings with the translation system and make generated/fallback in-game text language-aware (especially ProblemSolvingGame).",
-      "acceptanceCriteria": [
-        "All previously hardcoded UI strings in pages/components are replaced with translated strings (via the existing translation approach used in other components).",
-        "ProblemSolvingGame must not generate Turkish-only scenario/option text; generated/fallback scenarios/options must be language-aware so switching between Turkish and English changes the displayed scenarios/options accordingly.",
-        "Any accessibility/screen-reader-only user-facing strings (e.g., dialog descriptions) are also localized or derived from existing translations so they reflect the selected language."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/lib/translations.ts",
-          "operation": "modify",
-          "description": "Add missing translation keys for any newly-localized strings uncovered during the sweep (e.g., modal sr-only descriptions, image alt text labels, and game-specific instruction strings)."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded image alt text (e.g., the mascot image) with translated strings from the existing translation system."
-        },
-        {
-          "path": "frontend/src/pages/ColoringZone.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded template image alt text with translated strings (or a translated pattern-based label) so it reflects the selected language."
-        },
-        {
-          "path": "frontend/src/components/games/MathPuzzleGame.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded image alt text with translated strings so it updates on language change."
-        },
-        {
-          "path": "frontend/src/components/games/VisualRecognitionGame.tsx",
-          "operation": "modify",
-          "description": "Replace hardcoded image alt text and the Turkish-only instruction line with translated strings."
-        },
-        {
-          "path": "frontend/src/components/games/ProblemSolvingGame.tsx",
-          "operation": "modify",
-          "description": "Replace Turkish-only fallback scenarios/options with a language-aware fallback pool (at minimum Turkish and English) sourced from translations or from a language-aware fallback generator."
-        },
-        {
-          "path": "frontend/src/components/games/LogicPuzzleGame.tsx",
-          "operation": "modify",
-          "description": "Replace Turkish-only fallback puzzle text (notably time/spatial puzzles and any remaining Turkish strings) with language-aware versions (at minimum Turkish and English) and ensure selection uses the active language."
-        },
-        {
-          "path": "frontend/src/lib/problemSolvingFallback.ts",
-          "operation": "create",
-          "description": "Create a centralized, language-aware fallback problem generator for ProblemSolvingGame that provides scenario/options/correctOption in at least Turkish and English, and falls back to English for other supported languages."
-        },
-        {
-          "path": "frontend/src/lib/logicPuzzleFallback.ts",
-          "operation": "create",
-          "description": "Create a centralized, language-aware fallback puzzle generator for LogicPuzzleGame for any puzzle types that currently contain hardcoded Turkish strings, with at least Turkish and English variants and English fallback."
-        },
-        {
-          "path": "frontend/src/lib/localizedText.ts",
-          "operation": "create",
-          "description": "Add a shared helper to resolve backend LocalizedText into the current UI language (with an English fallback) to avoid duplicating mapping logic and to ensure consistent language switching behavior across games."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Refetch/recompute language-dependent React Query data on language change by including backend language in query keys and refreshing derived local state.",
-      "acceptanceCriteria": [
-        "Backend-sourced localized content (e.g., games list text, quiz questions, encouragement messages) updates when language changes.",
-        "React Query query keys for language-dependent queries include the current backend language value, and any derived local state from those queries is refreshed on language change (no stale language text remains)."
+        "When the user changes the language from the header, the currently-open screen (including Game Zone, Quiz Zone, and Coloring Zone) re-renders and shows the newly-selected language immediately.",
+        "No section remains stuck in English when a non-English language is selected.",
+        "Language choice persists via existing localStorage behavior and is applied on reload."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update language-dependent React Query query keys to include the current backend language value and ensure queries that return or contain localized content refresh when the language changes."
+          "description": "Ensure all React Query hooks used by Game Zone and any sub-games include the selected language (or mapped backend language) in their query keys and re-fetch behavior, so language changes invalidate cached results and update visible labels/content immediately."
         },
         {
           "path": "frontend/src/hooks/useRandomizedQuizQuestions.ts",
           "operation": "modify",
-          "description": "Ensure the randomized quiz questions query key and query function are explicitly tied to the current backend language value so changing language triggers a refetch and avoids stale localized questions."
+          "description": "Ensure quiz-question fetching is keyed by selected language (or mapped backend language) so switching languages immediately refreshes quiz data (or cleanly falls back) without requiring navigation or reload."
         },
         {
           "path": "frontend/src/pages/GameZone.tsx",
           "operation": "modify",
-          "description": "Ensure any local derived state from language-dependent queries (e.g., displayed game name/description derived from backend data) is not cached in a way that prevents immediate updates when language changes."
+          "description": "Verify that any UI state that derives from translated strings (e.g., game list metadata) is computed from the current language at render time (or re-computed when language changes) so the Game Zone updates instantly when the header language changes."
         },
         {
           "path": "frontend/src/pages/QuizZone.tsx",
           "operation": "modify",
-          "description": "Ensure derived local state from backend quiz queries is re-initialized as needed on language changes so no stale-language question text remains in the active quiz session."
+          "description": "Ensure language changes while the Quiz Zone is open update all visible labels/toasts immediately and re-initialize fallback-question selection (and any per-session derived UI text) based on the new language."
+        },
+        {
+          "path": "frontend/src/pages/ColoringZone.tsx",
+          "operation": "modify",
+          "description": "Ensure language changes while the Coloring Zone is open update all visible labels/states immediately, including empty/unavailable states and any derived UI strings."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Audit Game/Quiz/Coloring zones and their rendered components to replace hard-coded English strings with the existing translation system (useTranslation(language)) or localized fallback pools.",
+      "acceptanceCriteria": [
+        "Switching language to es/fr/de/it/ru/pt/zh/ja changes Game Zone UI labels, in-game instructions, buttons, and headings (not only the main navigation labels).",
+        "Switching language to es/fr/de/it/ru/pt/zh/ja changes Quiz Zone UI labels/messages (loading, score/question labels, buttons, toasts) and the fallback question pool selection uses the chosen language.",
+        "Switching language to es/fr/de/it/ru/pt/zh/ja changes Coloring Zone UI labels (choose template, start coloring, unavailable states, etc.)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/games/ShapeMatchingGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English UI strings (instructions, labels, buttons, headings, completion messages) with useTranslation(language) driven strings so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/games/MathPuzzleGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English UI strings with the existing translation system so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/games/MemoryCardGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English UI strings (e.g., move counters, prompts, success text) with useTranslation(language) so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English strings (including any difficulty/category labels, hints/instructions, buttons) with the existing translation system so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/games/VisualRecognitionGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English UI strings (instructions, counters, completion text, back buttons) with useTranslation(language) so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "operation": "modify",
+          "description": "Replace hard-coded English UI strings (category labels, selection prompts, correctness messages, progress labels) with useTranslation(language) and ensure any fallback scenario pools select by the chosen language."
+        },
+        {
+          "path": "frontend/src/components/games/SortingClassificationGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English UI strings (items/categories labels, remaining counters, feedback messages) with useTranslation(language) so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/games/QuickReactionTapGame.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English UI strings (round labels, instructions, start button, time-up/feedback messages) with useTranslation(language) so the 2D game UI updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/components/CelebrationModal.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English modal text (congratulations, level complete, next/continue, try again) with useTranslation(language) so the modal updates instantly when language changes mid-session."
+        },
+        {
+          "path": "frontend/src/components/coloring/ColoringCanvas.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English strings for coloring tool UI (brush size, zoom, undo, clear, download, success messages) with useTranslation(language) so the Coloring Canvas updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/pages/ColoringZone.tsx",
+          "operation": "modify",
+          "description": "Replace any hard-coded English labels/headings/buttons/unavailable states with useTranslation(language) so the Coloring Zone page updates instantly with language changes."
+        },
+        {
+          "path": "frontend/src/pages/QuizZone.tsx",
+          "operation": "modify",
+          "description": "Replace any remaining hard-coded English quiz strings (button labels, headings, result messages) with useTranslation(language) and ensure toast messages always use translated keys for the current language."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Fill or correctly map missing translation keys so es/fr/de/it/ru/pt/zh/ja do not silently fall back to English for Game/Quiz/Coloring strings (including Daily Surprise and in-game category labels).",
+      "acceptanceCriteria": [
+        "For each supported language (tr, en, es, fr, de, it, ru, pt, zh, ja), the UI strings used on Game Zone/Quiz Zone/Coloring Zone have explicit translations (not English defaults), except for proper nouns like the app name if intentionally unchanged.",
+        "Language selector changes result in visibly different translations for at least the core labels on each of the three zones (e.g., Back, Loading, Choose Template, Start Coloring, Question, Score, etc.)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/translations.ts",
+          "operation": "modify",
+          "description": "Complete missing non-English translations for keys used in Game Zone/Quiz Zone/Coloring Zone and their sub-features (e.g., Daily Surprise labels, in-game category labels, tool labels, feedback/toast strings) so es/fr/de/it/ru/pt/zh/ja do not fall back to English."
+        },
+        {
+          "path": "frontend/src/lib/problemSolvingFallback.ts",
+          "operation": "modify",
+          "description": "Audit fallback problem-solving content and ensure any user-facing category names or labels shown in UI have language-appropriate values or are paired with translation keys (rather than English literals)."
+        },
+        {
+          "path": "frontend/src/lib/logicPuzzleFallback.ts",
+          "operation": "modify",
+          "description": "Audit logic-puzzle fallback content for any UI-exposed labels/strings and ensure they are available per supported language or use translation keys (avoiding silent English fallback)."
+        },
+        {
+          "path": "frontend/src/lib/dailySurprise.ts",
+          "operation": "modify",
+          "description": "Ensure any user-facing Daily Surprise-related labels (if present in this module) are represented via translation keys (not hard-coded English), and remain consistent across all supported languages."
         }
       ]
     }

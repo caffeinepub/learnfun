@@ -1,75 +1,106 @@
 {
   "kind": "build_request",
-  "title": "Fix language switching so all app content updates across pages and games",
-  "priority": "normal",
+  "title": "Fix app-wide instant language switching for all languages (Game/Quiz/Coloring included)",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
+      "text": "Ensure that selecting any supported language (tr, en, es, fr, de, it, ru, pt, zh, ja) updates all visible UI text immediately across the entire app, including Game Zone, Quiz Zone, and Coloring Zone, without requiring navigation or page refresh.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-5",
+          "recent-6"
         ],
         "quotes": [
-          "dil seçeneğini değişince sadece üst kısımdaki var değişiyor diğer içerikler hep aynı kalıyor",
-          "yüzde yüz bir değişme olsun",
-          "build"
+          "türkçe ve ingilizce çalışıyor ama diğer diller çalışmıyor.",
+          "tüm dillere hangi dil seçilirse anında tüm uygulama o dil seçeneğine dönecek"
         ]
       },
       "acceptanceCriteria": [
-        "When the user changes language via the language selector, all visible text on the currently open page updates immediately (same render cycle) to the selected language.",
-        "This includes at minimum: HomePage, GameZone, QuizZone, ColoringZone, Header, Footer, and any open modals/dialogs (e.g., CelebrationModal).",
-        "No full page reload is needed; the UI updates purely via React state/context changes."
+        "When the user changes the language from the header, the currently-open screen (including Game Zone, Quiz Zone, and Coloring Zone) re-renders and shows the newly-selected language immediately.",
+        "No section remains stuck in English when a non-English language is selected.",
+        "Language choice persists via existing localStorage behavior and is applied on reload."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
+      "text": "Audit Game Zone, Quiz Zone, and Coloring Zone pages and all game/coloring components they render, and remove/replace any hard-coded English strings with the existing translation system (useTranslation(language)) or localized fallback pools so that all user-facing strings can render in the selected language.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-3",
+          "recent-5"
         ],
         "quotes": [
-          "sadece üst baardaki kısımlar değişiyor",
-          "yüzde yüz bir değişme olsun"
+          "Hala oyun bölgesi-Quiz Bölgesi ve Boyama bölümü içindeki kısımlarda çeviri gerçekleşmiyor sadece ingilizce gözülüyor",
+          "türkçe ve ingilizce çalışıyor ama diğer diller çalışmıyor."
         ]
       },
       "acceptanceCriteria": [
-        "All previously hardcoded UI strings in pages/components are replaced with translated strings (via the existing translation approach used in other components).",
-        "ProblemSolvingGame must not generate Turkish-only scenario/option text; generated/fallback scenarios/options must be language-aware so switching between Turkish and English changes the displayed scenarios/options accordingly.",
-        "Any accessibility/screen-reader-only user-facing strings (e.g., dialog descriptions) are also localized or derived from existing translations so they reflect the selected language."
+        "Switching language to es/fr/de/it/ru/pt/zh/ja changes Game Zone UI labels, in-game instructions, buttons, and headings (not only the main navigation labels).",
+        "Switching language to es/fr/de/it/ru/pt/zh/ja changes Quiz Zone UI labels/messages (loading, score/question labels, buttons, toasts) and the fallback question pool selection uses the chosen language.",
+        "Switching language to es/fr/de/it/ru/pt/zh/ja changes Coloring Zone UI labels (choose template, start coloring, unavailable states, etc.)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
+      "text": "Complete or корректly map missing translation keys so that es/fr/de/it/ru/pt/zh/ja do not silently fall back to the English `commonTranslations` values for strings used in Game Zone, Quiz Zone, and Coloring Zone (including sub-features like Daily Surprise card labels and in-game category labels).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "recent-5"
         ],
         "quotes": [
-          "dil seçeneğini değişince ... diğer içerikler hep aynı kalıyor"
+          "türkçe ve ingilizce çalışıyor ama diğer diller çalışmıyor."
         ]
       },
       "acceptanceCriteria": [
-        "Backend-sourced localized content (e.g., games list text, quiz questions, encouragement messages) updates when language changes.",
-        "React Query query keys for language-dependent queries include the current backend language value, and any derived local state from those queries is refreshed on language change (no stale language text remains)."
+        "For each supported language (tr, en, es, fr, de, it, ru, pt, zh, ja), the UI strings used on Game Zone/Quiz Zone/Coloring Zone have explicit translations (not English defaults), except for proper nouns like the app name if intentionally unchanged.",
+        "Language selector changes result in visibly different translations for at least the core labels on each of the three zones (e.g., Back, Loading, Choose Template, Start Coloring, Question, Score, etc.)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Ensure backend-provided localized content does not cause unintended English-only display for non-English languages: for any backend endpoints used by Game Zone/Quiz Zone/Coloring Zone that return localized structures, verify the requested language is applied; where the backend has language-specific message pools, add missing languages or provide a non-English fallback strategy that matches the selected language.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "recent-5",
+          "recent-6"
+        ],
+        "quotes": [
+          "türkçe ve ingilizce çalışıyor ama diğer diller çalışmıyor.",
+          "tüm dillere hangi dil seçilirse anında tüm uygulama o dil seçeneğine dönecek"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend endpoints that accept a `Language` parameter return content localized to that language when available, rather than always returning English.",
+        "No backend feature used in the app-wide flow (e.g., encouragement messages) returns English-only text for languages that the app claims to support, unless the language is explicitly not supported by that feature and the fallback behavior is documented/consistent."
       ]
     }
   ],
   "constraints": [
-    "Use English for any user-facing text in this build request.",
-    "Do not edit files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT."
+    "Do not modify any files under frontend/src/components/ui (read-only).",
+    "Do not edit frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx (immutable paths).",
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if existing stable state must be upgraded."
   ],
   "nonGoals": [
-    "Adding new languages beyond the existing supported set.",
-    "Redesigning UI layout or adding new features unrelated to language switching."
+    "Adding new languages beyond the currently supported set (tr, en, es, fr, de, it, ru, pt, zh, ja).",
+    "Introducing third-party i18n libraries or external translation services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

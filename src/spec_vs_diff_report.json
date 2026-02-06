@@ -1,80 +1,87 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T13:57:06.569Z",
-  "summary": "Diff adds language-aware backend language mapping in LanguageContext, updates several pages/components to use useTranslation(language), introduces helpers to resolve backend LocalizedText and to generate language-aware fallback content for certain games, and updates some React Query query keys to include backendLanguage. However, the diff evidence does not fully demonstrate that all required pages/zones/components (especially ColoringZone, GameZone, QuizZone, Header, Footer) and all language-dependent queries are updated, and it includes unrelated additions (e.g., Privacy Policy link, extra sound effects/game enhancements).",
+  "generatedAt": "2026-02-06T15:35:35.045Z",
+  "summary": "Diff shows changes in backend localization helpers (getLocalizedText + conversion functions) and an expanded frontend translation dictionary file, plus a meta summary file describing many UI/game changes that are not otherwise present in the actual modified-file list. Based on available evidence, the core app-wide instant language switching and full removal of hard-coded English strings across Game/Quiz/Coloring cannot be confirmed as implemented.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Changing the language updates 100% of user-visible text across the entire app (HomePage, GameZone, QuizZone, ColoringZone, Header, Footer, open modals) immediately without reload.",
-      "reason": "Only HomePage and CelebrationModal are shown with explicit translation usage in the diff excerpts. The diff summary references other files (GameZone, QuizZone, Header, Footer), but their actual code changes are not included, and ColoringZone changes are not evidenced at all. With truncated/absent diffs, it is not verifiable that all pages/zones and components re-render fully on language change.",
+      "requirement": "Ensure selecting any supported language updates all visible UI text immediately across the entire app (Game/Quiz/Coloring included) without navigation/refresh; persists via existing localStorage behavior.",
+      "reason": "The diff does not show changes to the pages/components responsible for rendering Game Zone, Quiz Zone, or Coloring Zone to ensure they subscribe to language context and re-render instantly. Only translations.ts and backend/main.mo are shown as modified code files; no concrete evidence of UI re-render wiring is present.",
       "evidence": [
-        "frontend/src/pages/HomePage.tsx",
-        "frontend/src/components/CelebrationModal.tsx",
+        "frontend/src/lib/translations.ts",
+        "backend/main.mo",
         "frontend-file-summaries.txt"
       ]
     },
     {
       "id": "REQ-2",
-      "requirement": "Remove/replace hardcoded non-localized strings so they come from translations or language-aware backend data; ensure all generated/fallback in-game text is language-aware; localize accessibility strings.",
-      "reason": "While ProblemSolvingGame now uses resolveLocalizedText for backend content and has a language-aware fallback pool, other games still contain hardcoded strings that are not demonstrated as localized. For example, LogicPuzzleGame includes many inline hardcoded puzzle question strings (number sequences) and the diff does not show a systematic replacement of hardcoded UI strings across all pages/components. Also, only CelebrationModal’s sr-only description is evidenced as localized; other accessibility strings across the app are not verifiable from the provided diff.",
+      "requirement": "Audit Game Zone, Quiz Zone, and Coloring Zone pages and all rendered components to remove/replace hard-coded English strings with the existing translation system or localized fallback pools (including quiz fallback pool selection).",
+      "reason": "No actual diffs for GameZone/QuizZone/Coloring components are provided; only a meta summary file claims such updates. The only verifiable code change shown is the translation dictionary; that alone does not prove hard-coded strings were removed or that quiz fallback question pools are language-aware.",
       "evidence": [
-        "frontend/src/components/games/ProblemSolvingGame.tsx",
-        "frontend/src/lib/problemSolvingFallback.ts",
-        "frontend/src/components/games/LogicPuzzleGame.tsx",
-        "frontend/src/lib/logicPuzzleFallback.ts",
-        "frontend/src/components/CelebrationModal.tsx"
+        "frontend/src/lib/translations.ts",
+        "frontend-file-summaries.txt"
       ]
     },
     {
       "id": "REQ-3",
-      "requirement": "All language-dependent React Query data must refetch/recompute on language change; query keys should include backendLanguage and derived local state should refresh.",
-      "reason": "Some hooks are updated to include backendLanguage in query keys (useGames, useQuizQuestions, useEncouragementMessage, useRandomizedQuizQuestions). However, the useQueries.ts diff is truncated before showing other hooks (e.g., useLogicPuzzles, useProblemSolvingTasks, useVisualRecognitionTasks, useColoringTemplates) so it cannot be confirmed they also include backendLanguage. Additionally, useMemoryGames queryKey shown does not include backendLanguage, and it is unclear from the diff whether memory game data is localized; if it is, this would be missing.",
+      "requirement": "Complete/correctly map missing translation keys so es/fr/de/it/ru/pt/zh/ja don’t silently fall back to English for strings used in Game/Quiz/Coloring (including Daily Surprise labels and in-game category labels).",
+      "reason": "translations.ts is truncated and only shows English commonTranslations content; there is insufficient evidence that non-English dictionaries contain explicit translations for the relevant keys or that missing-key behavior avoids silent English fallback for those languages.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/hooks/useRandomizedQuizQuestions.ts",
-        "frontend/src/contexts/LanguageContext.tsx"
+        "frontend/src/lib/translations.ts"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Ensure backend-provided localized content is returned in the requested language for endpoints used by Game/Quiz/Coloring; add missing languages or consistent non-English fallback strategies where needed.",
+      "reason": "backend/main.mo shows a Language variant and getLocalizedText/convert* helpers, but the diff is truncated before showing the public endpoints and whether they actually accept/apply the requested Language for all relevant flows (e.g., encouragement messages, quiz question pools).",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Localized Privacy Policy link in the Footer that opens an external URL in a new tab.",
-      "reason": "Not requested by any requirement; the build request is specifically about language switching and localization coverage, not adding new footer links/features.",
+      "description": "Addition of a localized Privacy Policy link in the Footer that opens an external URL in a new tab.",
+      "reason": "Not requested by any REQ; BuildRequest focuses on instant language switching and removing English strings in Game/Quiz/Coloring and backend localization.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/components/Footer.tsx mentions new localized Privacy Policy link)"
+        "frontend-file-summaries.txt (Footer component description)"
       ]
     },
     {
-      "description": "New/expanded sound effects behavior (celebration sound, quiz tap/correct/wrong sounds, and multiple in-game sound effects).",
-      "reason": "Not requested; unrelated to fixing language switching and localization regression.",
+      "description": "Consolidated MusicControlsPopup button in the header and changes to background music playback/mute behavior.",
+      "reason": "Not requested; audio/music controls are outside the i18n scope defined by REQ-1..REQ-4.",
       "evidence": [
-        "frontend/src/components/CelebrationModal.tsx (playSound('celebration'))",
-        "frontend-file-summaries.txt (mentions sound effects in QuizZone, ShapeMatchingGame, MemoryCardGame, etc.)"
+        "frontend-file-summaries.txt (App.tsx and Header.tsx descriptions)"
       ]
     },
     {
-      "description": "Substantial game feature expansions (e.g., advanced shape matching system, expanded memory card themes, expanded math puzzle types, daily surprise section).",
-      "reason": "Non-goal includes avoiding unrelated new features; these appear to be gameplay/feature additions beyond language switching fixes.",
+      "description": "CelebrationModal integrated celebration sound that plays once per modal open.",
+      "reason": "Not requested; adds audio behavior beyond language switching/localization requirements.",
       "evidence": [
-        "frontend-file-summaries.txt (ShapeMatchingGame advanced system, MemoryCardGame enhanced themes, MathPuzzleGame expanded, GameZone Daily Surprise section)"
+        "frontend-file-summaries.txt (CelebrationModal description)"
+      ]
+    },
+    {
+      "description": "Game feature expansions and sound effects integration (e.g., advanced ShapeMatchingGame rule system, MemoryCardGame enhancements, quiz sound effects).",
+      "reason": "Not requested; requirements are about localization and instant language switching, not expanding gameplay or adding sound effects.",
+      "evidence": [
+        "frontend-file-summaries.txt (ShapeMatchingGame, QuizZone, MemoryCardGame descriptions)"
+      ]
+    },
+    {
+      "description": "UI styling/visual changes such as 'vibrant OKLCH color system' and Tailwind palette/design-token updates.",
+      "reason": "Not requested; styling changes are not part of the specified i18n fix scope.",
+      "evidence": [
+        "frontend-file-summaries.txt (index.css, tailwind.config.js descriptions)"
       ]
     }
   ],
-  "confidence": 0.56,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/CelebrationModal.tsx",
-    "frontend/src/components/games/LogicPuzzleGame.tsx",
-    "frontend/src/components/games/ProblemSolvingGame.tsx",
-    "frontend/src/components/games/VisualRecognitionGame.tsx",
-    "frontend/src/contexts/LanguageContext.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useRandomizedQuizQuestions.ts",
-    "frontend/src/lib/localizedText.ts",
-    "frontend/src/lib/logicPuzzleFallback.ts",
-    "frontend/src/lib/problemSolvingFallback.ts",
-    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/lib/translations.ts",
     "project_state.json"
   ]
 }

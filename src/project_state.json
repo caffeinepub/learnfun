@@ -1,42 +1,57 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Implement app-wide multilingual support with instant language switching across all sections (Game/Quiz/Coloring included).",
   "architectural_notes": [
-    "Ensure language selection is managed globally (e.g., i18n provider/context) so all UI strings re-render on language change, not just top bar."
+    "Language selection should propagate globally so all UI text re-renders immediately across every module (Game/Quiz/Coloring included)."
   ],
   "known_issues": [
-    "Language switch currently only updates the top bar; the rest of the app content does not change language (regression; expected 100% of content to update)."
+    "Language switching currently works for Turkish/English but other languages do not apply; Game/Quiz/Coloring sections remain in English when other languages are selected."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-language-switch-regression-so-that-changing-the-language-updates-100-of-user-visible-text-across-the-entire-app-not-only-the-top-header-bar-without-requiring-a-page-reload",
-      "title": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-replace-hardcoded-non-localized-strings-in-pages-and-components-so-they-are-sourced-from-the-translation-system-languagecontext-translations-or-from-language-aware-backend-data-ensuring-all-in-game-generated-texts-also-switch-language-correctly",
-      "title": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-react-query-data-that-is-language-dependent-is-refetched-or-recomputed-on-language-change-so-backend-sourced-localized-content-updates-consistently-across-the-app",
-      "title": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
+      "id": "feature-complete-or-ly-map-missing-translation-keys-so-that-es-fr-de-it-ru-pt-zh-ja-do-not-silently-fall-back-to-the-english-commontranslations-values-for-strings-used-in-game-zone-quiz-zone-and-coloring-zone-including-sub-features-like-daily-surprise-card-labels-and-in-game-category-labels",
+      "title": "Complete or корректly map missing translation keys so that es/fr/de/it/ru/pt/zh/ja do not silently fall back to the English `commonTranslations` values for strings used in Game Zone, Quiz Zone, and Coloring Zone (including sub-features like Daily Surprise card labels and in-game category labels).",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix language switching so all app content updates across pages and games",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Ensure selected language updates instantly across the entire app, including Game/Quiz/Coloring sections, for all supported languages (not only Turkish/English).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Ensure that selecting any supported language (tr, en, es, fr, de, it, ru, pt, zh, ja) updates all visible UI text immediately across the entire app, including Game Zone, Quiz Zone, and Coloring Zone, without requiring navigation or page refresh.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Audit Game Zone, Quiz Zone, and Coloring Zone pages and all game/coloring components they render, and remove/replace any hard-coded English strings with the existing translation system (useTranslation(language)) or localized fallback pools so that all user-facing strings can render in the selected language.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Ensure backend-provided localized content does not cause unintended English-only display for non-English languages: for any backend endpoints used by Game Zone/Quiz Zone/Coloring Zone that return localized structures, verify the requested language is applied; where the backend has language-specific message pools, add missing languages or provide a non-English fallback strategy that matches the selected language.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Fix app-wide instant language switching for all languages (Game/Quiz/Coloring included)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

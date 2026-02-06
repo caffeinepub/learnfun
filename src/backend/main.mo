@@ -190,12 +190,12 @@ actor {
     };
 
     let result = array.toVarArray();
-    var i = size - 1;
+    var i = (size - 1 : Nat).toInt();
     while (i > 0) {
-      let j = randomIndex(i);
-      if (j != i) {
-        let temp = result[i];
-        result[i] := result[j];
+      let j = randomIndex(Int.abs(i) % size);
+      if (j.toInt() != i) {
+        let temp = result[Int.abs(i)];
+        result[Int.abs(i)] := result[j];
         result[j] := temp;
       };
       i -= 1;
@@ -415,7 +415,7 @@ actor {
       case (#russian) { russianMessages };
       case (#chinese) { chineseMessages };
       case (#japanese) { japaneseMessages };
-      case (_) { ["Well done!"] };
+      case (_) { [] };
     };
 
     let messageCount = languageMessages.size();
@@ -544,4 +544,3 @@ actor {
     );
   };
 };
-

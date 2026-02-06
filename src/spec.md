@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix language switching so changing the app language updates all user-visible text across every page and game immediately, without a page reload.
+**Goal:** Make language switching work instantly and consistently across the entire app (Game Zone, Quiz Zone, and Coloring Zone) for all supported languages (tr, en, es, fr, de, it, ru, pt, zh, ja).
 
 **Planned changes:**
-- Ensure the current language is stored and consumed via React state/context so all pages and components re-render with the selected language in the same render cycle.
-- Replace/remove hardcoded non-localized strings across pages, games, and shared components so all user-facing text comes from the existing translation system (or language-aware data).
-- Make generated/in-game text (including ProblemSolvingGame scenarios/options and any fallback content) language-aware so it updates when the language changes.
-- Update language-dependent React Query usage so localized backend-sourced content refetches/recomputes on language change (e.g., by including the current language in query keys and refreshing derived state).
+- Fix app-wide language switching so changing the language from the header immediately re-renders the currently open screen (including Game/Quiz/Coloring) without navigation or refresh, while keeping existing localStorage persistence.
+- Audit Game Zone, Quiz Zone, and Coloring Zone pages/components to remove/replace hard-coded English UI strings with the existing translation system so all user-facing text renders in the selected language.
+- Add/repair missing translation keys/mappings so es/fr/de/it/ru/pt/zh/ja do not silently fall back to English for strings used in Game/Quiz/Coloring (including sub-features like Daily Surprise card labels and in-game category labels).
+- Verify backend endpoints used by Game/Quiz/Coloring honor the requested language where localized content is supported, and ensure backend responses don’t unintentionally force English-only output for supported languages.
 
-**User-visible outcome:** Switching languages updates 100% of visible UI text (including games, quizzes, coloring areas, and any open dialogs/modals) instantly across the app, with no stale-language content and no page reload.
+**User-visible outcome:** Selecting any supported language updates all visible UI text immediately across the app (including Game Zone, Quiz Zone, and Coloring Zone), and non-English languages no longer get stuck showing English strings.

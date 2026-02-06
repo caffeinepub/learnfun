@@ -1,93 +1,78 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T13:57:06.572Z",
+  "generatedAt": "2026-02-06T15:35:35.048Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the language-switch regression so that changing the language updates 100% of user-visible text across the entire app (not only the top header bar), without requiring a page reload.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/contexts/LanguageContext.tsx",
-          "frontend/src/components/CelebrationModal.tsx",
-          "frontend/src/components/games/ProblemSolvingGame.tsx",
-          "frontend/src/components/games/LogicPuzzleGame.tsx",
-          "frontend/src/components/games/VisualRecognitionGame.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/contexts/LanguageContext.tsx",
-          "frontend/src/components/CelebrationModal.tsx",
-          "frontend/src/components/games/ProblemSolvingGame.tsx",
-          "frontend/src/components/games/LogicPuzzleGame.tsx",
-          "frontend/src/components/games/VisualRecognitionGame.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Remove/replace hardcoded non-localized strings in pages and components so they are sourced from the translation system (LanguageContext + translations) or from language-aware backend data, ensuring all in-game/generated texts also switch language correctly.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/lib/translations.ts",
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/pages/ColoringZone.tsx",
-          "frontend/src/components/games/MathPuzzleGame.tsx",
-          "frontend/src/components/games/VisualRecognitionGame.tsx",
-          "frontend/src/components/games/ProblemSolvingGame.tsx",
-          "frontend/src/components/games/LogicPuzzleGame.tsx",
-          "frontend/src/lib/problemSolvingFallback.ts",
-          "frontend/src/lib/logicPuzzleFallback.ts",
-          "frontend/src/lib/localizedText.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/HomePage.tsx",
-          "frontend/src/components/games/VisualRecognitionGame.tsx",
-          "frontend/src/components/games/ProblemSolvingGame.tsx",
-          "frontend/src/components/games/LogicPuzzleGame.tsx",
-          "frontend/src/lib/problemSolvingFallback.ts",
-          "frontend/src/lib/logicPuzzleFallback.ts",
-          "frontend/src/lib/localizedText.ts"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Ensure React Query data that is language-dependent is refetched (or recomputed) on language change so backend-sourced localized content updates consistently across the app.",
-        "status": "implemented",
+        "summary": "Ensure that selecting any supported language (tr, en, es, fr, de, it, ru, pt, zh, ja) updates all visible UI text immediately across the entire app, including Game Zone, Quiz Zone, and Coloring Zone, without requiring navigation or page refresh.",
+        "status": "missing",
         "plannedFiles": [
           "frontend/src/hooks/useQueries.ts",
           "frontend/src/hooks/useRandomizedQuizQuestions.ts",
           "frontend/src/pages/GameZone.tsx",
+          "frontend/src/pages/QuizZone.tsx",
+          "frontend/src/pages/ColoringZone.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Audit Game Zone, Quiz Zone, and Coloring Zone pages and all game/coloring components they render, and remove/replace any hard-coded English strings with the existing translation system (useTranslation(language)) or localized fallback pools so that all user-facing strings can render in the selected language.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/games/ShapeMatchingGame.tsx",
+          "frontend/src/components/games/MathPuzzleGame.tsx",
+          "frontend/src/components/games/MemoryCardGame.tsx",
+          "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "frontend/src/components/games/VisualRecognitionGame.tsx",
+          "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "frontend/src/components/games/SortingClassificationGame.tsx",
+          "frontend/src/components/games/QuickReactionTapGame.tsx",
+          "frontend/src/components/CelebrationModal.tsx",
+          "frontend/src/components/coloring/ColoringCanvas.tsx",
+          "frontend/src/pages/ColoringZone.tsx",
           "frontend/src/pages/QuizZone.tsx"
         ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Complete or корректly map missing translation keys so that es/fr/de/it/ru/pt/zh/ja do not silently fall back to the English `commonTranslations` values for strings used in Game Zone, Quiz Zone, and Coloring Zone (including sub-features like Daily Surprise card labels and in-game category labels).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/translations.ts",
+          "frontend/src/lib/problemSolvingFallback.ts",
+          "frontend/src/lib/logicPuzzleFallback.ts",
+          "frontend/src/lib/dailySurprise.ts"
+        ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useRandomizedQuizQuestions.ts"
+          "frontend/src/lib/translations.ts"
         ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Ensure backend-provided localized content does not cause unintended English-only display for non-English languages: for any backend endpoints used by Game Zone/Quiz Zone/Coloring Zone that return localized structures, verify the requested language is applied; where the backend has language-specific message pools, add missing languages or provide a non-English fallback strategy that matches the selected language.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/CelebrationModal.tsx",
-    "frontend/src/components/games/LogicPuzzleGame.tsx",
-    "frontend/src/components/games/ProblemSolvingGame.tsx",
-    "frontend/src/components/games/VisualRecognitionGame.tsx",
-    "frontend/src/contexts/LanguageContext.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useRandomizedQuizQuestions.ts",
-    "frontend/src/lib/localizedText.ts",
-    "frontend/src/lib/logicPuzzleFallback.ts",
-    "frontend/src/lib/problemSolvingFallback.ts",
-    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/lib/translations.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

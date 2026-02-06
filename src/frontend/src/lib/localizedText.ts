@@ -16,6 +16,7 @@ export function resolveLocalizedText(localized: LocalizedText, language: Languag
     ru: 'russian',
     pt: 'portuguese',
     zh: 'chinese',
+    ja: 'japanese',
   };
   
   const key = langMap[language];
