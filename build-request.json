@@ -1,0 +1,95 @@
+{
+  "kind": "build_request",
+  "title": "Make all 10 languages apply instantly and completely across all games and content",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Ensure that when a user selects any supported language (tr, en, es, fr, de, it, ru, pt, zh, ja), every screen, game, and UI string updates immediately and shows 100% in the selected language with no English (or other language) leftovers anywhere in the app.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1",
+          "msg-2"
+        ],
+        "quotes": [
+          "Uygulama 10 dil tarafından destekleniyor. Hangi dil seçilirse uygulama anında tüm bileşenleriyle tüm kısımlarıyla tüm içeriğiyle o dile dönecek. Yani tüm dilleri yüzde yüz destekleyecek",
+          "Türkçe çevirilerde sorun var özellikle hafıza oyunu, puzzle oyunu, problem vs bulunduğu kısımda ingilizce kalıyor ... yüzde yüz olmalı uygulamanın her yerşinde"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Switching language from the language selector updates the visible text on the current screen without requiring a refresh or navigation.",
+        "In Turkish (tr), Memory Card Game, Logic Puzzle Game, and Problem Solving Game contain zero English UI strings (headers, buttons, helper text, toasts, labels).",
+        "For each supported language, there are no obvious untranslated UI strings in Game Zone, Quiz Zone, Coloring Zone, and shared components like Header/Footer/CelebrationModal (spot-check by switching languages and visiting each zone)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Audit and fix frontend components so they do not render hardcoded English strings for game UI; all user-facing strings in Memory Card Game, Logic Puzzle Game, and Problem Solving Game must come from the translation system (useTranslation + translations dictionary) and be present for all 10 languages.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Türkçe ... hafıza oyunu, puzzle oyunu, problem ... ingilizce kalıyor ... türkçe çevirir yüzde yüz olmalı"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Memory Card Game: all labels (including theme/category labels like farm animals/wild animals/space adventures/cultural landmarks/etc.), instructions, and toasts are translated for all 10 languages.",
+        "Logic Puzzle Game: difficulty labels, puzzle category labels, prompts, buttons, and any feedback text are translated for all 10 languages.",
+        "Problem Solving Game: scenario intro UI, selection/submit controls, correctness feedback, and category labels are translated for all 10 languages.",
+        "No component in these games uses English string literals for user-visible text except through translations (e.g., no raw 'Select answer', 'Correct!', etc.)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Complete translation-key coverage in frontend/src/lib/translations.ts so that es/fr/de/it/ru/pt/zh/ja do not silently fall back to English for keys used in Game Zone, Quiz Zone, and Coloring Zone (including sub-features like Daily Surprise labels and in-game category labels).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "10 dil ... yüzde yüz destekleyecek"
+        ]
+      },
+      "acceptanceCriteria": [
+        "For every key accessed via useTranslation in the app, translations exist for all 10 languages (tr, en, es, fr, de, it, ru, pt, zh, ja).",
+        "When switching to any non-English language, Game Zone cards (names/descriptions), Daily Surprise card labels, and in-game category labels do not revert to English due to missing keys.",
+        "Add a dev-time safeguard (e.g., console warning in development builds) when a translation key is missing for the active language, so missing coverage is detectable during testing."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Ensure backend-provided user-facing text fully supports all 10 languages where the backend is the source, including encouragement messages returned by getEncouragementMessage; no supported language should receive an English fallback like 'Keep going!' due to missing language arrays.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "tüm dilleri yüzde yüz destekleyecek"
+        ]
+      },
+      "acceptanceCriteria": [
+        "getEncouragementMessage returns a message in the requested backend Language for all supported languages (#turkish, #english, #spanish, #french, #german, #italian, #russian, #portuguese, #chinese, #japanese).",
+        "No supported language results in an empty message set that triggers the hardcoded fallback string.",
+        "Spot-check: requesting encouragement messages for level 1 in each language returns a non-empty localized message in that language."
+      ]
+    }
+  ],
+  "constraints": [
+    "Frontend immutable paths must not be edited: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/*.",
+    "Backend must remain a single-actor Motoko canister; place all logic in backend/main.mo and add backend/migration.mo only if an existing stable state schema must change."
+  ],
+  "nonGoals": [
+    "Adding new languages beyond the existing 10 supported language codes.",
+    "Integrating external i18n libraries or third-party translation services.",
+    "Changing unrelated gameplay logic, scoring, or adding new games."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

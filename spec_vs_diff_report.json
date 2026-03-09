@@ -1,0 +1,61 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-06T16:25:55.982Z",
+  "summary": "Diff only modifies backend/main.mo (partially shown) and project_state.json. No frontend translation system/components/translations.ts changes are present, so the frontend i18n requirements (REQ-1/2/3) are not implemented in this diff. Backend changes show introduction of LocalizedText and localization conversion helpers, but the diff is truncated and does not show getEncouragementMessage being updated or encouragementMessages being populated for all 10 languages, so REQ-4 cannot be verified as implemented.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Ensure that when a user selects any supported language (tr, en, es, fr, de, it, ru, pt, zh, ja), every screen, game, and UI string updates immediately and shows 100% in the selected language with no English leftovers anywhere in the app.",
+      "reason": "No frontend files were modified; there is no evidence of changes to language selector behavior, re-rendering, or removal of leftover hardcoded strings across screens/zones/components.",
+      "evidence": [
+        "File diff summary shows only modified: backend/main.mo, project_state.json"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Audit and fix frontend components so they do not render hardcoded English strings for Memory Card Game, Logic Puzzle Game, and Problem Solving Game; all strings must come from the translation system and exist for all 10 languages.",
+      "reason": "No game frontend components were modified in the diff, so there is no evidence that hardcoded English strings were removed or replaced with useTranslation keys.",
+      "evidence": [
+        "File diff summary shows only modified: backend/main.mo, project_state.json"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Complete translation-key coverage in frontend/src/lib/translations.ts for all 10 languages and add a dev-time missing-key safeguard.",
+      "reason": "frontend/src/lib/translations.ts is not modified, and there is no evidence of added key coverage or a development-time missing-translation warning.",
+      "evidence": [
+        "File diff summary shows only modified: backend/main.mo, project_state.json"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Ensure backend-provided user-facing text fully supports all 10 languages for getEncouragementMessage with no English fallback due to missing language arrays.",
+      "reason": "backend/main.mo shows a new Language type and an encouragementMessages map, but the diff is truncated and does not show (a) getEncouragementMessage implementation changes, or (b) population of encouragementMessages for all 10 languages to avoid the fallback.",
+      "evidence": [
+        "backend/main.mo (truncated): shows `type Language = { ... }` and `let encouragementMessages = Map.empty<Language, [Text]>();` but no shown population or getEncouragementMessage changes"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Backend-wide localization refactor introducing `LocalizedText` and conversion helpers for questions/games (beyond encouragement messages).",
+      "reason": "BuildRequest backend scope is specifically about backend-provided user-facing text for encouragement messages; the diff shows broader localization structures for quiz questions/games, which is not explicitly requested.",
+      "evidence": [
+        "backend/main.mo (truncated): adds `type LocalizedText`, uses it in `Question`, `Game`, `LogicPuzzle`, `ProblemSolving`, and adds `getLocalizedText`, `convertQuestion`, `convertGame`"
+      ]
+    },
+    {
+      "description": "Modification of project_state.json to add/track internal feature request entries (AR-1..AR-5) and status metadata.",
+      "reason": "BuildRequest does not request changing project tracking/state JSON; it is not part of the app’s functional requirements.",
+      "evidence": [
+        "project_state.json"
+      ]
+    }
+  ],
+  "confidence": 0.66,
+  "changed_files": [
+    "backend/main.mo",
+    "project_state.json"
+  ]
+}

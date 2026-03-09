@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Uygulama 10 dili destekleyecek ve kullanıcı hangi dili seçerse tüm bileşenler/oyunlar/metinler/içerik anında ve %100 o dile çevrilmiş olarak güncellenecek.",
+  "architectural_notes": [
+    "Dil değişimi runtime’da tüm bileşenlerde anında güncellenmeli; sabit (hardcoded) metin bırakılmamalı."
+  ],
+  "known_issues": [
+    "Türkçe seçiliyken hafıza oyunu, puzzle oyunu ve problem bölümündeki içeriklerin İngilizce kalması (çeviri kapsamı eksik/uygulanmıyor)."
+  ],
+  "isFixRequest": true,
+  "existing_features": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "10 dil için tam kapsamlı (%100) çeviri ve dil seçildiğinde tüm ekran/bileşen/içeriğin anında o dile geçmesi",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Ensure that when a user selects any supported language (tr, en, es, fr, de, it, ru, pt, zh, ja), every screen, game, and UI string updates immediately and shows 100% in the selected language with no English (or other language) leftovers anywhere in the app.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Audit and fix frontend components so they do not render hardcoded English strings for game UI; all user-facing strings in Memory Card Game, Logic Puzzle Game, and Problem Solving Game must come from the translation system (useTranslation + translations dictionary) and be present for all 10 languages.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Complete translation-key coverage in frontend/src/lib/translations.ts so that es/fr/de/it/ru/pt/zh/ja do not silently fall back to English for keys used in Game Zone, Quiz Zone, and Coloring Zone (including sub-features like Daily Surprise labels and in-game category labels).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Ensure backend-provided user-facing text fully supports all 10 languages where the backend is the source, including encouragement messages returned by getEncouragementMessage; no supported language should receive an English fallback like 'Keep going!' due to missing language arrays.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Make all 10 languages apply instantly and completely across all games and content",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

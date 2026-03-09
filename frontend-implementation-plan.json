@@ -1,0 +1,126 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Instant, complete 10-language coverage across all zones and game UIs",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Make language switching update all visible UI strings immediately across zones, games, and shared components with no leftover strings from other languages.",
+      "acceptanceCriteria": [
+        "Switching language from the language selector updates the visible text on the current screen without requiring a refresh or navigation.",
+        "In Turkish (tr), Memory Card Game, Logic Puzzle Game, and Problem Solving Game contain zero English UI strings (headers, buttons, helper text, toasts, labels).",
+        "For each supported language, there are no obvious untranslated UI strings in Game Zone, Quiz Zone, Coloring Zone, and shared components like Header/Footer/CelebrationModal (spot-check by switching languages and visiting each zone)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Audit and replace any hardcoded user-facing strings with translation keys via the existing translation system; ensure all header text reacts to LanguageContext changes (re-render on language change)."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Replace any hardcoded user-facing strings (e.g., privacy policy link text) with translation keys so footer text updates immediately when language changes."
+        },
+        {
+          "path": "frontend/src/components/CelebrationModal.tsx",
+          "operation": "modify",
+          "description": "Ensure all modal titles, messages, and button labels are sourced from the translation system (no string literals), and that modal content re-renders correctly on language change."
+        },
+        {
+          "path": "frontend/src/pages/GameZone.tsx",
+          "operation": "modify",
+          "description": "Audit Game Zone cards/labels/descriptions and any in-zone UI copy to ensure it is fully translation-driven and updates instantly on language switch (no leftover English due to cached derived strings)."
+        },
+        {
+          "path": "frontend/src/pages/QuizZone.tsx",
+          "operation": "modify",
+          "description": "Audit Quiz Zone UI copy (headers, buttons, helper text, empty states, toasts) to ensure it uses the translation system and re-renders instantly when the active language changes."
+        },
+        {
+          "path": "frontend/src/pages/ColoringZone.tsx",
+          "operation": "modify",
+          "description": "Audit Coloring Zone UI copy (template selection labels, empty states, tool labels, error states) to ensure it is fully translation-driven and updates instantly when switching languages."
+        },
+        {
+          "path": "frontend/src/pages/HomePage.tsx",
+          "operation": "modify",
+          "description": "Audit Home page navigation/welcome/age-selection UI strings to ensure all user-facing text is sourced from the translation system and updates instantly on language switch."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Remove hardcoded English game UI strings and ensure Memory Card Game, Logic Puzzle Game, and Problem Solving Game use translation keys and/or fully localized fallback content for all 10 languages.",
+      "acceptanceCriteria": [
+        "Memory Card Game: all labels (including theme/category labels like farm animals/wild animals/space adventures/cultural landmarks/etc.), instructions, and toasts are translated for all 10 languages.",
+        "Logic Puzzle Game: difficulty labels, puzzle category labels, prompts, buttons, and any feedback text are translated for all 10 languages.",
+        "Problem Solving Game: scenario intro UI, selection/submit controls, correctness feedback, and category labels are translated for all 10 languages.",
+        "No component in these games uses English string literals for user-visible text except through translations (e.g., no raw 'Select answer', 'Correct!', etc.)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/games/MemoryCardGame.tsx",
+          "operation": "modify",
+          "description": "Audit the Memory Card Game UI for any remaining user-visible string literals (including theme/category button labels, headings, and toasts) and route them through the translation system; ensure any theme/category labels use translation keys that exist for all 10 languages."
+        },
+        {
+          "path": "frontend/src/components/games/LogicPuzzleGame.tsx",
+          "operation": "modify",
+          "description": "Eliminate hardcoded English/Turkish puzzle text (notably the word-puzzle pools) and move all user-facing puzzle labels/prompts/buttons/feedback to the translation system; ensure puzzle-type selection labels are fully localized for all 10 languages."
+        },
+        {
+          "path": "frontend/src/lib/logicPuzzleFallback.ts",
+          "operation": "modify",
+          "description": "Expand/adjust logic-puzzle fallback generation so any fallback content that is user-visible (especially time/word-related prompts) is available for all 10 languages and selected by LanguageCode (no English-only fallbacks)."
+        },
+        {
+          "path": "frontend/src/components/games/ProblemSolvingGame.tsx",
+          "operation": "modify",
+          "description": "Ensure all Problem Solving Game UI strings come from the translation system (category labels, instructions, selection prompts, feedback/toasts), and that language switching regenerates/refreshes currently displayed content where appropriate to avoid showing previous-language strings."
+        },
+        {
+          "path": "frontend/src/lib/problemSolvingFallback.ts",
+          "operation": "modify",
+          "description": "Replace the Turkish/English-only fallback pool with fully localized fallback pools (or equivalent localized selection mechanism) for all 10 languages so scenarios/options/correct answers never display in English for non-English languages."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Ensure complete translation-key coverage for all 10 languages and add a dev-time missing-key safeguard to prevent silent English fallback in Game Zone, Quiz Zone, Coloring Zone, and shared UI.",
+      "acceptanceCriteria": [
+        "For every key accessed via useTranslation in the app, translations exist for all 10 languages (tr, en, es, fr, de, it, ru, pt, zh, ja).",
+        "When switching to any non-English language, Game Zone cards (names/descriptions), Daily Surprise card labels, and in-game category labels do not revert to English due to missing keys.",
+        "Add a dev-time safeguard (e.g., console warning in development builds) when a translation key is missing for the active language, so missing coverage is detectable during testing."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/translations.ts",
+          "operation": "modify",
+          "description": "Complete the translations dictionary so every key used by the app exists for all 10 languages (tr/en/es/fr/de/it/ru/pt/zh/ja); enhance useTranslation (or the translation accessor) to emit a development-only console warning when a key is missing for the active language (and when a fallback is used)."
+        },
+        {
+          "path": "frontend/src/lib/dailySurprise.ts",
+          "operation": "modify",
+          "description": "Ensure any Daily Surprise UI-facing labels referenced from zones/pages use translation keys that exist for all 10 languages (and avoid constructing user-visible labels via hardcoded English)."
+        },
+        {
+          "path": "frontend/src/lib/backgroundMusicOptions.ts",
+          "operation": "modify",
+          "description": "Verify that every background music option label key referenced here exists in translations for all 10 languages; add/align keys to prevent silent fallback to English in shared components."
+        },
+        {
+          "path": "frontend/src/lib/localizedText.ts",
+          "operation": "modify",
+          "description": "Add a development-only console warning when backend LocalizedText resolution falls back away from the active language (to help detect missing localized backend content during testing) while keeping runtime behavior stable."
+        },
+        {
+          "path": "frontend/src/lib/translationAudit.ts",
+          "operation": "create",
+          "description": "Add a small dev-only helper that can compare translation key sets across the 10 languages and report missing keys (used by translations.ts and/or optionally invoked by pages during development to prevent silent gaps)."
+        }
+      ]
+    }
+  ]
+}

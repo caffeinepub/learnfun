@@ -1,0 +1,45 @@
+<html lang='en'>
+    <head>
+        <meta charset='UTF-8' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+        <title>LearnFun - Educational Children&#x27;s App</title>
+        
+        <!-- Early Android WebView audio configuration -->
+        <script>
+          // Detect Android WebView bridge and configure audio mode
+          // Based on NEW bridge API: window.BackgroundAudio and window.AndroidAudio
+          (function() {
+            // Check for new Android audio bridge objects
+            var hasBackgroundAudio = typeof window.BackgroundAudio !== 'undefined' && 
+                                     typeof window.BackgroundAudio.start === 'function';
+            var hasAndroidAudio = typeof window.AndroidAudio !== 'undefined' && 
+                                  typeof window.AndroidAudio.playSound === 'function';
+            
+            if (hasBackgroundAudio || hasAndroidAudio) {
+              // Android WebView with new bridge detected - enable bridge-only audio mode
+              window.__AUDIO_CONFIG__ = window.__AUDIO_CONFIG__ || {};
+              window.__AUDIO_CONFIG__.androidOnly = true;
+            }
+          })();
+        </script>
+    </head>
+    <body>
+        <div id='root'></div>
+        <script type='module' src='/src/main.tsx'></script>
+        
+        <!-- Service Worker Registration -->
+        <script>
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                  console.log('ServiceWorker registration successful');
+                })
+                .catch(function(err) {
+                  console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+          }
+        </script>
+    </body>
+</html>
